@@ -1,0 +1,156 @@
+<template>
+  <div class="p-4 sm:p-6 max-w-2xl mx-auto">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="page-title">{{ $t('notifications.title') }}</h1>
+      <button v-if="unreadCount > 0" @click="markAllRead"
+        class="btn btn-ghost btn-sm text-primary">
+        {{ $t('notifications.markAllRead') }}
+      </button>
+    </div>
+
+    <!-- Filter tabs -->
+    <div class="flex gap-2 mb-4">
+      <button @click="activeFilter = 'all'"
+        class="px-4 py-2 rounded-xl text-sm font-medium transition-all"
+        :class="activeFilter === 'all' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">
+        {{ $t('notifications.all') }}
+        <span class="ml-1 text-xs">{{ notifications.length }}</span>
+      </button>
+      <button @click="activeFilter = 'unread'"
+        class="px-4 py-2 rounded-xl text-sm font-medium transition-all"
+        :class="activeFilter === 'unread' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">
+        {{ $t('notifications.unread') }}
+        <span v-if="unreadCount > 0" class="ml-1 text-xs bg-danger text-white rounded-full px-1.5 py-0.5">
+          {{ unreadCount }}
+        </span>
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div v-if="loading" class="text-center py-12">
+      <div class="inline-block w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+    </div>
+
+    <!-- Empty -->
+    <div v-else-if="filtered.length === 0" class="card text-center py-12">
+      <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+        </svg>
+      </div>
+      <p class="text-gray-400">{{ $t('notifications.noNotifications') }}</p>
+    </div>
+
+    <!-- Notifications list -->
+    <div v-else class="space-y-2">
+      <div v-for="notif in filtered" :key="notif.id"
+        class="card cursor-pointer transition-all hover:shadow-sm"
+        :class="notif.is_read ? 'opacity-70' : 'border-primary-200'"
+        @click="readNotif(notif)">
+        <div class="flex items-start gap-3">
+          <!-- Icon -->
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+            :class="notifIconBg(notif.type)">
+            <svg v-if="notif.type === 'received'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+            </svg>
+            <svg v-else-if="notif.type === 'dispatched'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+            </svg>
+            <svg v-else-if="notif.type === 'arrived'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+            </svg>
+            <svg v-else-if="notif.type === 'ready'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <svg v-else-if="notif.type === 'delivered'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+
+          <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between gap-2">
+              <p class="text-sm font-medium text-gray-900" :class="{ 'font-bold': !notif.is_read }">
+                {{ notif.title }}
+              </p>
+              <div class="flex items-center gap-1 flex-shrink-0">
+                <div v-if="!notif.is_read" class="w-2 h-2 rounded-full bg-primary"></div>
+                <span class="text-xs text-gray-400">{{ timeAgo(notif.created_at) }}</span>
+              </div>
+            </div>
+            <p v-if="notif.message" class="text-xs text-gray-500 mt-0.5 line-clamp-2">
+              {{ notif.message }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { useNotificationsStore } from '@/stores/notifications.js'
+
+export default {
+  name: 'NotificationsPage',
+
+  data() {
+    return { activeFilter: 'all' }
+  },
+
+  computed: {
+    store() { return useNotificationsStore() },
+    loading() { return this.store.loading },
+    notifications() { return this.store.notifications },
+    unreadCount() { return this.store.unreadCount },
+    filtered() {
+      if (this.activeFilter === 'unread') {
+        return this.notifications.filter(n => !n.is_read)
+      }
+      return this.notifications
+    }
+  },
+
+  methods: {
+    async readNotif(notif) {
+      if (!notif.is_read) {
+        await this.store.markRead(notif.id)
+      }
+    },
+    async markAllRead() {
+      await this.store.markAllRead()
+    },
+    notifIconBg(type) {
+      const map = {
+        received: 'bg-blue-100 text-blue-700',
+        dispatched: 'bg-purple-100 text-purple-700',
+        arrived: 'bg-teal-100 text-teal-700',
+        ready: 'bg-green-100 text-green-700',
+        delivered: 'bg-green-100 text-green-700',
+        info: 'bg-gray-100 text-gray-700'
+      }
+      return map[type] || 'bg-gray-100 text-gray-700'
+    },
+    timeAgo(dateStr) {
+      if (!dateStr) return ''
+      const now = new Date()
+      const then = new Date(dateStr)
+      const diffMs = now - then
+      const diffMin = Math.floor(diffMs / 60000)
+      if (diffMin < 1) return 'только что'
+      if (diffMin < 60) return `${diffMin} мин`
+      const diffH = Math.floor(diffMin / 60)
+      if (diffH < 24) return `${diffH} ч`
+      return then.toLocaleDateString('ru-RU', { day: '2-digit', month: 'short' })
+    }
+  },
+
+  mounted() {
+    this.store.fetchNotifications()
+  }
+}
+</script>
