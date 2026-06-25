@@ -287,15 +287,14 @@ export default {
 
     async loadUnassignedParcels() {
       try {
-        // Fetch parcels with received_at_warehouse/processing status
-        const r = await parcelsAPI.getAll({ limit: 100 })
+        const params = { limit: 100 }
+        if (this.searchParcelQuery.trim()) {
+          params.search = this.searchParcelQuery.trim()
+        }
+        const r = await parcelsAPI.getAll(params)
         const list = r.data.data || []
         // Filter out parcels that are already assigned to an AWB
-        this.unassignedParcels = list.filter(p => !p.airway_bill_id && ['received_at_warehouse', 'processing'].includes(p.status))
-        if (this.searchParcelQuery.trim()) {
-          const q = this.searchParcelQuery.toLowerCase()
-          this.unassignedParcels = this.unassignedParcels.filter(p => p.tracking_number.toLowerCase().includes(q))
-        }
+        this.unassignedParcels = list.filter(p => !p.airway_bill_id)
       } catch (e) {
         this.unassignedParcels = []
       }

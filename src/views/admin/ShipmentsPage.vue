@@ -391,6 +391,11 @@ export default {
     async saveParcel() {
       this.saving = true
       try {
+        // If a customer is selected, status cannot be unknown_recipient
+        if (this.selectedCustomer && this.form.status === 'unknown_recipient') {
+          this.form.status = 'received_at_warehouse'
+        }
+
         const payload = {
           tracking_number: this.form.tracking_number,
           warehouse_id: this.form.warehouse_id,
