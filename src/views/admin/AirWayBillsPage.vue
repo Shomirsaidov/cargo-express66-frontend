@@ -84,7 +84,7 @@
         <div>
           <div class="flex justify-between items-center mb-2">
             <h4 class="text-sm font-semibold text-gray-700">Посылки на рейсе ({{ assignedParcels.length }})</h4>
-            <button @click="showAssignModal = true" class="text-xs text-primary font-medium hover:underline">
+            <button @click="openAssignModal" class="text-xs text-primary font-medium hover:underline">
               + Привязать посылку
             </button>
           </div>
@@ -154,15 +154,29 @@
               <div class="space-y-3">
                 <input v-model="searchParcelQuery" type="text" placeholder="Поиск по трек-номеру..." class="input-field mb-2" @input="loadUnassignedParcels" />
 
+                <!-- Select All Checkbox -->
+                <div v-if="unassignedParcels.length > 0" class="flex justify-between items-center mb-1 px-1">
+                  <div class="flex items-center gap-2">
+                    <input type="checkbox" :checked="isAllSelected" @change="toggleSelectAll" id="select_all_parcels"
+                      class="rounded border-gray-300 text-primary focus:ring-primary w-4 h-4" />
+                    <label for="select_all_parcels" class="text-xs font-semibold text-gray-700 cursor-pointer">Выбрать все</label>
+                  </div>
+                  <span class="text-[10px] text-gray-500">Выбрано: {{ selectedParcelIds.length }}</span>
+                </div>
+
                 <div class="max-h-60 overflow-y-auto border border-gray-200 rounded-lg divide-y divide-gray-100">
                   <div v-if="unassignedParcels.length === 0" class="p-4 text-center text-xs text-gray-400">
                     Нет свободных посылок для привязки
                   </div>
                   <div v-else v-for="p in unassignedParcels" :key="p.id"
                     class="p-3 text-xs flex justify-between items-center hover:bg-gray-50">
-                    <div>
-                      <p class="font-mono font-semibold text-gray-800">{{ p.tracking_number }}</p>
-                      <p class="text-[10px] text-gray-400">{{ p.weight || '0' }} кг | {{ p.status }}</p>
+                    <div class="flex items-center gap-3">
+                      <input type="checkbox" :value="p.id" v-model="selectedParcelIds"
+                        class="rounded border-gray-300 text-primary focus:ring-primary w-4 h-4" />
+                      <div>
+                        <p class="font-mono font-semibold text-gray-800">{{ p.tracking_number }}</p>
+                        <p class="text-[10px] text-gray-400">{{ p.weight || '0' }} кг | {{ p.status }}</p>
+                      </div>
                     </div>
                     <button @click="assignParcel(p.id)" class="btn btn-outline btn-sm !py-1 !px-2 text-[10px]">
                       Привязать
@@ -170,9 +184,19 @@
                   </div>
                 </div>
               </div>
-              <button @click="showAssignModal = false" class="btn btn-ghost border border-gray-200 w-full mt-4">
-                Закрыть
-              </button>
+              <div class="flex gap-2 mt-4">
+                <button @click="showAssignModal = false" class="btn btn-ghost border border-gray-200 flex-1">
+                  Закрыть
+                </button>
+                <button @click="assignSelectedParcels" :disabled="selectedParcelIds.length === 0 || assigningBulk"
+                  class="btn btn-primary flex-1">
+                  <svg v-if="assigningBulk" class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                  </svg>
+                  Привязать выбранные
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -199,6 +223,8 @@ export default {
       showAssignModal: false,
       isEdit: false,
       editingId: null,
+      selectedParcelIds: [],
+      assigningBulk: false,
       searchParcelQuery: '',
 
       form: {
@@ -210,6 +236,13 @@ export default {
       statusForm: {
         status: 'scheduled'
       }
+    }
+  },
+
+  computed: {
+    isAllSelected() {
+      if (this.unassignedParcels.length === 0) return false
+      return this.unassignedParcels.every(p => this.selectedParcelIds.includes(p.id))
     }
   },
 
@@ -320,9 +353,51 @@ export default {
       }
     },
 
+    openAssignModal() {
+      this.selectedParcelIds = []
+      this.searchParcelQuery = ''
+      this.showAssignModal = true
+      this.loadUnassignedParcels()
+    },
+
+    toggleSelectAll() {
+      const visibleIds = this.unassignedParcels.map(p => p.id)
+      if (this.isAllSelected) {
+        this.selectedParcelIds = this.selectedParcelIds.filter(id => !visibleIds.includes(id))
+      } else {
+        const newSelected = [...this.selectedParcelIds]
+        visibleIds.forEach(id => {
+          if (!newSelected.includes(id)) {
+            newSelected.push(id)
+          }
+        })
+        this.selectedParcelIds = newSelected
+      }
+    },
+
+    async assignSelectedParcels() {
+      if (this.selectedParcelIds.length === 0) return
+      this.assigningBulk = true
+      try {
+        await Promise.all(
+          this.selectedParcelIds.map(id => awbAPI.assignParcel(this.selectedAwb.id, id))
+        )
+        alert('Все выбранные посылки успешно привязаны!')
+        this.selectedParcelIds = []
+        this.loadAssignedParcels()
+        this.loadUnassignedParcels()
+        this.showAssignModal = false
+      } catch (e) {
+        alert('Произошла ошибка при массовой привязке')
+      } finally {
+        this.assigningBulk = false
+      }
+    },
+
     async assignParcel(parcelId) {
       try {
         await awbAPI.assignParcel(this.selectedAwb.id, parcelId)
+        this.selectedParcelIds = this.selectedParcelIds.filter(id => id !== parcelId)
         this.loadAssignedParcels()
         this.loadUnassignedParcels()
       } catch (e) {
