@@ -146,7 +146,8 @@ export default {
     trackBtn: 'Track',
     notFound: 'Package not found',
     parcelInfo: 'Package Information',
-    statusHistory: 'Status History'
+    statusHistory: 'Status History',
+    customer: 'Recipient'
   },
   admin: {
     dashboard: 'Dashboard',

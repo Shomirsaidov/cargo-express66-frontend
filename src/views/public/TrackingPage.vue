@@ -63,6 +63,13 @@
             <p class="text-xs text-gray-500">{{ $t('shipments.arrivalDate') }}</p>
             <p class="font-medium">{{ formatDate(parcel.arrival_date) }}</p>
           </div>
+          <div v-if="parcel.customer">
+            <p class="text-xs text-gray-500">{{ $t('publicTracking.customer') }}</p>
+            <p class="font-medium">
+              {{ parcel.customer.last_name }} {{ parcel.customer.first_name }}
+              <span class="text-xs text-primary font-mono font-semibold">({{ parcel.customer.customer_code }})</span>
+            </p>
+          </div>
         </div>
       </div>
 

@@ -146,7 +146,8 @@ export default {
     trackBtn: 'Отследить',
     notFound: 'Посылка не найдена',
     parcelInfo: 'Информация о посылке',
-    statusHistory: 'История статусов'
+    statusHistory: 'История статусов',
+    customer: 'Получатель'
   },
   admin: {
     dashboard: 'Дашборд',
