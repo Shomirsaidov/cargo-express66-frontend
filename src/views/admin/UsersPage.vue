@@ -203,7 +203,7 @@ export default {
     this.loading = true
     try {
       const r = await usersAPI.getAll()
-      this.users = r.data?.users || r.data || []
+      this.users = r.data?.data || (Array.isArray(r.data) ? r.data : [])
     } catch (e) {
       this.users = []
     } finally {
