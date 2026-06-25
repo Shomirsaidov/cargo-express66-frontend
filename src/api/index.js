@@ -151,7 +151,7 @@ export const scannerAPI = {
   receiveParcel: (data) => api.post('/parcels', data),
   getParcels: (params) => api.get('/parcels', { params }),
   assignCustomer: (parcelId, customerId) => api.put(`/parcels/${parcelId}`, { customer_id: customerId }),
-  searchCustomers: (query) => api.get('/customers', { params: { search: query } })
+  searchCustomers: (query) => api.get('/customers', { params: { search: query, role: 'customer' } })
 }
 
 // Calculator

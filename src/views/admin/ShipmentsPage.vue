@@ -128,7 +128,7 @@
                 <div class="grid grid-cols-2 gap-4">
                   <div>
                     <label class="form-label">Трек-номер:</label>
-                    <input v-model="form.tracking_number" type="text" required class="input-field" :disabled="isEdit" />
+                    <input v-model="form.tracking_number" type="text" required class="input-field" :disabled="isEdit" @change="lookupTrackingNumber" />
                   </div>
 
                   <div>
@@ -182,7 +182,7 @@
                     </button>
                   </div>
                   <div v-else class="space-y-2">
-                    <input v-model="customerQuery" type="text" placeholder="Поиск клиента..." class="input-field" @input="searchCustomers" />
+                    <input v-model="customerQuery" type="text" placeholder="Поиск клиента..." class="input-field" @input="searchCustomers" @focus="searchCustomers" />
                     <div v-if="customerResults.length > 0" class="max-h-32 overflow-y-auto border border-gray-200 rounded-lg bg-white divide-y divide-gray-100">
                       <div v-for="c in customerResults" :key="c.id" @click="selectCustomer(c)"
                         class="p-2 text-xs hover:bg-primary-50 cursor-pointer flex justify-between">
@@ -354,15 +354,28 @@ export default {
 
     async searchCustomers() {
       const q = this.customerQuery.trim()
-      if (q.length < 2) {
-        this.customerResults = []
-        return
-      }
       try {
         const r = await scannerAPI.searchCustomers(q)
         this.customerResults = r.data.data?.users || r.data.data || []
       } catch (e) {
         this.customerResults = []
+      }
+    },
+
+    async lookupTrackingNumber() {
+      if (this.isEdit) return
+      const trackNum = this.form.tracking_number.trim()
+      if (!trackNum) return
+      
+      try {
+        const r = await scannerAPI.scanParcel(trackNum)
+        if (r.data?.data?.customer) {
+          this.selectedCustomer = r.data.data.customer
+        } else if (r.data?.data?.parcel?.customers) {
+          this.selectedCustomer = r.data.data.parcel.customers
+        }
+      } catch (e) {
+        console.error('Failed to lookup tracking number:', e)
       }
     },
 
