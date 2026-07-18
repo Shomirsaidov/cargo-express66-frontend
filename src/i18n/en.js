@@ -12,7 +12,8 @@ export default {
     privacy: 'Privacy',
     login: 'Login',
     register: 'Register',
-    logout: 'Logout'
+    logout: 'Logout',
+    additionalServices: 'Services'
   },
   auth: {
     email: 'Email',

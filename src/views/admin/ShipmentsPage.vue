@@ -61,7 +61,16 @@
             <td colspan="8" class="text-center py-8 text-gray-400">Отправления не найдены</td>
           </tr>
           <tr v-else v-for="p in parcels" :key="p.id">
-            <td class="font-mono text-sm font-semibold text-gray-900">{{ p.tracking_number }}</td>
+            <td class="font-mono text-sm font-semibold text-gray-900">
+              <div>{{ p.tracking_number }}</div>
+              <div v-if="p.parcel_services && p.parcel_services.length > 0" class="flex flex-wrap gap-1 mt-1">
+                <span v-for="ps in p.parcel_services" :key="ps.id"
+                  class="text-[9px] bg-primary-50 text-primary-700 px-1.5 py-0.5 rounded border border-primary-100 font-sans"
+                  :title="ps.additional_services?.description || ''">
+                  {{ getServiceNameRu(ps.additional_services?.name) }} (${{ ps.cost }})
+                </span>
+              </div>
+            </td>
             <td>
               <div v-if="p.customers">
                 <p class="font-medium text-gray-800 text-xs">{{ p.customers.last_name }} {{ p.customers.first_name }}</p>
@@ -276,6 +285,17 @@ export default {
   },
 
   methods: {
+    getServiceNameRu(name) {
+      if (!name) return '';
+      const lower = name.toLowerCase();
+      if (lower.includes('insurance')) return 'Страхование';
+      if (lower.includes('inspection')) return 'Проверка';
+      if (lower.includes('photo')) return 'Фото';
+      if (lower.includes('functionality')) return 'Проверка раб.';
+      if (lower.includes('packaging') || lower.includes('repackaging')) return 'Упаковка';
+      return name;
+    },
+
     formatDate(d) {
       if (!d) return '—'
       return new Date(d).toLocaleDateString('ru-RU')

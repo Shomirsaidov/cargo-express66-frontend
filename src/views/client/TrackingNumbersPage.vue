@@ -117,6 +117,66 @@
                       placeholder="Дополнительные заметки..."></textarea>
                   </div>
 
+                  <!-- Existing parcel weight notice or estimated weight input -->
+                  <div v-if="existingParcelWeight" class="p-3 bg-green-50 text-green-700 text-xs rounded-lg">
+                    Посылка уже принята на складе. Фактический вес: <strong>{{ existingParcelWeight }} кг</strong>
+                  </div>
+                  <div v-else class="form-group">
+                    <label class="form-label">Ориентировочный вес (кг) для расчета стоимости:</label>
+                    <input v-model="form.estimated_weight" type="number" step="0.1" min="0" class="input-field"
+                      placeholder="Например: 1.5" />
+                  </div>
+
+                  <!-- Additional Services Checklist -->
+                  <div class="form-group" v-if="availableServices.length > 0">
+                    <label class="form-label font-bold text-gray-700">Дополнительные услуги:</label>
+                    <div class="space-y-2 mt-2 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                      <div v-for="service in availableServices" :key="service.id" class="flex items-start">
+                        <input type="checkbox" :id="'service_' + service.id" :value="service.id" v-model="form.additional_services"
+                          class="rounded border-gray-300 text-primary focus:ring-primary w-4 h-4 mr-2 mt-0.5 cursor-pointer" />
+                        <label :for="'service_' + service.id" class="text-sm text-gray-700 cursor-pointer select-none flex-1">
+                          <span class="font-medium text-gray-900">{{ getServiceNameRu(service) }}</span>
+                          <span class="text-gray-400 font-medium ml-1">
+                            ({{ service.price_type === 'percentage' ? service.percentage + '%' : '+$' + service.price }})
+                          </span>
+                          <p class="text-xs text-gray-400 mt-0.5" v-if="service.description">
+                            {{ service.description }}
+                          </p>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Declared value input (if Insurance is selected) -->
+                  <div v-if="isInsuranceSelected" class="form-group bg-blue-50 border border-blue-100 p-3 rounded-lg">
+                    <label class="form-label text-blue-900">Стоимость товара ($) *</label>
+                    <input v-model.number="form.declared_value" type="number" step="0.1" min="0" required class="input-field border-blue-200 focus:border-primary"
+                      placeholder="Введите объявленную стоимость..." />
+                  </div>
+
+                  <!-- Calculation Breakdown -->
+                  <div class="bg-gray-50 rounded-xl p-4 space-y-2 border border-gray-100">
+                    <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Расчет стоимости</h4>
+                    <div class="flex justify-between text-sm">
+                      <span class="text-gray-600">Доставка:</span>
+                      <span class="font-semibold text-gray-900">
+                        {{ deliveryCost ? '$' + deliveryCost.toFixed(2) : '— (определяется при взвешивании)' }}
+                      </span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                      <span class="text-gray-600">Дополнительные услуги:</span>
+                      <span class="font-semibold text-gray-900">${{ additionalServicesCost.toFixed(2) }}</span>
+                    </div>
+                    <div v-if="isInsuranceSelected" class="flex justify-between text-sm">
+                      <span class="text-gray-600">Страхование:</span>
+                      <span class="font-semibold text-gray-900">${{ insuranceCost.toFixed(2) }}</span>
+                    </div>
+                    <div class="flex justify-between text-base font-bold pt-2 border-t border-gray-200">
+                      <span class="text-gray-800">Итого:</span>
+                      <span class="text-primary">${{ totalCost.toFixed(2) }}</span>
+                    </div>
+                  </div>
+
                   <div class="flex gap-3 pt-2">
                     <button type="button" @click="closeModal" class="btn btn-ghost flex-1 border border-gray-200">
                       {{ $t('common.cancel') }}
@@ -146,7 +206,7 @@
 
 <script>
 import { useTrackingStore } from '@/stores/tracking.js'
-import { warehousesAPI } from '@/api/index.js'
+import { warehousesAPI, servicesAPI, tariffsAPI, parcelsAPI } from '@/api/index.js'
 import ConfirmModal from '@/components/common/ConfirmModal.vue'
 
 export default {
@@ -166,22 +226,110 @@ export default {
         store_name: '',
         country_of_origin: '',
         warehouse_id: '',
-        notes: ''
+        notes: '',
+        additional_services: [],
+        declared_value: 0,
+        estimated_weight: ''
       },
-      warehouses: []
+      warehouses: [],
+      availableServices: [],
+      tariffs: [],
+      existingParcelWeight: null
     }
   },
 
   computed: {
     trackingStore() { return useTrackingStore() },
     trackingNumbers() { return this.trackingStore.trackingNumbers },
-    loading() { return this.trackingStore.loading }
+    loading() { return this.trackingStore.loading },
+    isInsuranceSelected() {
+      const insuranceService = this.availableServices.find(s => s.name.toLowerCase().includes('insurance'));
+      return insuranceService && this.form.additional_services.includes(insuranceService.id);
+    },
+    insuranceCost() {
+      if (!this.isInsuranceSelected) return 0;
+      const insuranceService = this.availableServices.find(s => s.name.toLowerCase().includes('insurance'));
+      if (!insuranceService) return 0;
+      const value = parseFloat(this.form.declared_value) || 0;
+      return (value * parseFloat(insuranceService.percentage)) / 100;
+    },
+    additionalServicesCost() {
+      let sum = 0;
+      this.form.additional_services.forEach(id => {
+        const service = this.availableServices.find(s => s.id === id);
+        if (service && service.price_type === 'fixed') {
+          sum += parseFloat(service.price) || 0;
+        }
+      });
+      return sum;
+    },
+    deliveryCost() {
+      if (this.existingParcelWeight) {
+        return this.calculateDeliveryCostForWeight(this.existingParcelWeight);
+      }
+      if (this.form.estimated_weight) {
+        return this.calculateDeliveryCostForWeight(parseFloat(this.form.estimated_weight));
+      }
+      return 0;
+    },
+    totalCost() {
+      return this.deliveryCost + this.additionalServicesCost + this.insuranceCost;
+    }
   },
 
   methods: {
+    getServiceNameRu(service) {
+      const name = service.name.toLowerCase();
+      if (name.includes('insurance')) return 'Страхование';
+      if (name.includes('inspection')) return 'Проверить товар';
+      if (name.includes('photo')) return 'Сделать фото';
+      if (name.includes('functionality')) return 'Проверить работоспособность';
+      if (name.includes('packaging') || name.includes('repackaging')) return 'Дополнительная упаковка';
+      return service.name;
+    },
+    calculateDeliveryCostForWeight(weight) {
+      if (!weight) return 0;
+      let country = this.form.country_of_origin;
+      if (!country && this.form.warehouse_id) {
+        const wh = this.warehouses.find(w => w.id === this.form.warehouse_id);
+        if (wh) country = wh.country;
+      }
+      if (!country) return 0;
+      const tariff = this.tariffs.find(t => t.country.toLowerCase() === country.toLowerCase() && t.is_active);
+      if (!tariff) return 0;
+      return Math.max(weight * parseFloat(tariff.price_per_kg), parseFloat(tariff.minimum_charge));
+    },
+    async checkExistingParcel() {
+      const trackNum = this.form.tracking_number.trim();
+      if (!trackNum) {
+        this.existingParcelWeight = null;
+        return;
+      }
+      try {
+        const r = await parcelsAPI.getByTracking(trackNum);
+        const parcel = r.data.data || r.data;
+        if (parcel && parcel.id) {
+          this.existingParcelWeight = parseFloat(parcel.weight) || null;
+        } else {
+          this.existingParcelWeight = null;
+        }
+      } catch (e) {
+        this.existingParcelWeight = null;
+      }
+    },
     openAddModal() {
       this.editingItem = null
-      this.form = { tracking_number: '', store_name: '', country_of_origin: '', warehouse_id: '', notes: '' }
+      this.form = {
+        tracking_number: '',
+        store_name: '',
+        country_of_origin: '',
+        warehouse_id: '',
+        notes: '',
+        additional_services: [],
+        declared_value: 0,
+        estimated_weight: ''
+      }
+      this.existingParcelWeight = null
       this.showModal = true
     },
     editItem(item) {
@@ -191,9 +339,13 @@ export default {
         store_name: item.store_name || '',
         country_of_origin: item.country_of_origin || '',
         warehouse_id: item.warehouse_id || '',
-        notes: item.notes || ''
+        notes: item.notes || '',
+        additional_services: item.additional_services || [],
+        declared_value: item.declared_value || 0,
+        estimated_weight: ''
       }
       this.showModal = true
+      this.checkExistingParcel()
     },
     closeModal() {
       this.showModal = false
@@ -207,10 +359,19 @@ export default {
       this.saving = true
       try {
         let result
+        const payload = {
+          tracking_number: this.form.tracking_number,
+          store_name: this.form.store_name,
+          country_of_origin: this.form.country_of_origin,
+          warehouse_id: this.form.warehouse_id,
+          notes: this.form.notes,
+          additional_services: this.form.additional_services,
+          declared_value: this.form.declared_value
+        }
         if (this.editingItem) {
-          result = await this.trackingStore.updateTrackingNumber(this.editingItem.id, this.form)
+          result = await this.trackingStore.updateTrackingNumber(this.editingItem.id, payload)
         } else {
-          result = await this.trackingStore.addTrackingNumber(this.form)
+          result = await this.trackingStore.addTrackingNumber(payload)
         }
         if (result.success) {
           this.closeModal()
@@ -233,16 +394,33 @@ export default {
     }
   },
 
+  watch: {
+    'form.tracking_number': {
+      handler() {
+        this.checkExistingParcel();
+      }
+    }
+  },
+
   async mounted() {
     await this.trackingStore.fetchTrackingNumbers()
     try {
       const r = await warehousesAPI.getAll()
       this.warehouses = r.data.data || r.data || []
     } catch (e) {
-      this.warehouses = [
-        { id: '1', name: 'USA Warehouse' },
-        { id: '2', name: 'Germany Warehouse' }
-      ]
+      this.warehouses = []
+    }
+    try {
+      const s = await servicesAPI.getAll()
+      this.availableServices = (s.data.data || s.data || []).filter(srv => srv.is_active)
+    } catch (e) {
+      this.availableServices = []
+    }
+    try {
+      const t = await tariffsAPI.getAll()
+      this.tariffs = (t.data.data || t.data || []).filter(trf => trf.is_active)
+    } catch (e) {
+      this.tariffs = []
     }
   }
 }

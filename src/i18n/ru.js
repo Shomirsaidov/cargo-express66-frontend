@@ -12,7 +12,8 @@ export default {
     privacy: 'Конфиденциальность',
     login: 'Войти',
     register: 'Регистрация',
-    logout: 'Выйти'
+    logout: 'Выйти',
+    additionalServices: 'Доп. услуги'
   },
   auth: {
     email: 'Email',

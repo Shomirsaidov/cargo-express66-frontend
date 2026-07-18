@@ -158,6 +158,7 @@ export default {
         { to: '/about', label: this.$t('nav.about') },
         { to: '/how-it-works', label: this.$t('nav.howItWorks') },
         { to: '/pricing', label: this.$t('nav.pricing') },
+        { to: '/services', label: this.$t('nav.additionalServices') },
         { to: '/tracking', label: this.$t('nav.tracking') },
         { to: '/calculator', label: this.$t('nav.calculator') },
         { to: '/contacts', label: this.$t('nav.contacts') },
