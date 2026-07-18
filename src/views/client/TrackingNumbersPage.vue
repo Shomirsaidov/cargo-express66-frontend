@@ -239,7 +239,10 @@ export default {
         { id: '22222222-3333-4444-5555-666666666666', name: 'Additional Packaging', description: 'Дополнительная упаковка (+$2)', price: 2, price_type: 'fixed', is_active: true },
         { id: 'e7a54f02-7c35-49a4-ad35-cf3f3f0a5678', name: 'Insurance', description: 'Страхование груза (2%)', price: 0, price_type: 'percentage', percentage: 2, is_active: true }
       ],
-      tariffs: [],
+      tariffs: [
+        { id: 'c5e32df0-5a13-6782-db13-ad1df1e83456', country: 'Germany', price_per_kg: 5.00, minimum_charge: 10.00, is_active: true },
+        { id: 'd6f43e01-6b24-4893-bc24-be2ef2f94567', country: 'USA', price_per_kg: 8.00, minimum_charge: 15.00, is_active: true }
+      ],
       existingParcelWeight: null
     }
   },
@@ -427,9 +430,12 @@ export default {
     }
     try {
       const t = await tariffsAPI.getAll()
-      this.tariffs = (t.data.data || t.data || []).filter(trf => trf.is_active)
+      const fetched = (t.data.data || t.data || []).filter(trf => trf.is_active)
+      if (fetched.length > 0) {
+        this.tariffs = fetched
+      }
     } catch (e) {
-      this.tariffs = []
+      console.error('Failed to load tariffs, using fallback:', e)
     }
   }
 }
