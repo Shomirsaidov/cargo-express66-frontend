@@ -2,9 +2,14 @@
   <div>
     <div class="flex items-center justify-between mb-6">
       <h1 class="page-title">{{ $t('admin.shipments') }}</h1>
-      <button @click="openCreateModal" class="btn btn-primary">
-        + Создать отправление
-      </button>
+      <div class="flex gap-2">
+        <button @click="openCreateModal(false)" class="btn btn-primary">
+          + Создать отправление
+        </button>
+        <button @click="openCreateModal(true)" class="btn btn-outline hover:bg-primary hover:text-white transition-all">
+          ⚡ Без трек-кода
+        </button>
+      </div>
     </div>
 
     <!-- Filters -->
@@ -89,6 +94,14 @@
             <td class="text-gray-500 text-[10px]">{{ formatDate(p.created_at) }}</td>
             <td>
               <div class="flex items-center gap-1">
+                <button @click="openPrintLabel(p)"
+                  class="p-1.5 text-gray-400 hover:text-primary hover:bg-primary-50 rounded-lg transition-all text-xs"
+                  title="Печать этикетки">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                  </svg>
+                </button>
                 <button @click="openEditModal(p)"
                   class="p-1.5 text-gray-400 hover:text-primary hover:bg-primary-50 rounded-lg transition-all text-xs"
                   title="Редактировать">
@@ -137,7 +150,8 @@
                 <div class="grid grid-cols-2 gap-4">
                   <div>
                     <label class="form-label">Трек-номер:</label>
-                    <input v-model="form.tracking_number" type="text" required class="input-field" :disabled="isEdit" @change="lookupTrackingNumber" />
+                    <input v-if="isNoTrack" type="text" disabled class="input-field bg-gray-50 text-gray-400 font-mono" value="RND (Автогенерация)" />
+                    <input v-else v-model="form.tracking_number" type="text" required class="input-field" :disabled="isEdit" @change="lookupTrackingNumber" />
                   </div>
 
                   <div>
@@ -268,12 +282,89 @@
         </div>
       </transition>
     </Teleport>
+    <!-- Print Label Modal -->
+    <Teleport to="body">
+      <transition name="fade">
+        <div v-if="showPrintLabelModal" class="modal-overlay animate-fade-in" @click.self="showPrintLabelModal = false">
+          <div class="modal-content max-w-sm overflow-hidden bg-white rounded-2xl shadow-xl border border-gray-100">
+            <div class="p-6">
+              <h3 class="text-lg font-bold mb-4 flex items-center gap-2 text-gray-900 border-b border-gray-100 pb-3">
+                <span>🏷️ Печать этикетки</span>
+              </h3>
+
+              <!-- The Printable Area -->
+              <div id="printable-label" class="border-2 border-black p-4 rounded-xl bg-white text-black font-sans my-4">
+                <!-- Header -->
+                <div class="border-b-2 border-black pb-2 flex justify-between items-center">
+                  <span class="text-sm font-black uppercase tracking-wider">Cargo Express 66</span>
+                  <span class="text-[10px] border border-black px-1.5 py-0.5 rounded font-bold">EXPRESS</span>
+                </div>
+
+                <!-- From / To info -->
+                <div class="border-b border-black py-2.5 text-xs">
+                  <div class="text-[9px] font-bold text-gray-500 uppercase tracking-wide">Откуда / From:</div>
+                  <div class="font-bold text-gray-800">{{ printLabelData.warehouse_name || 'Main Warehouse' }}</div>
+                </div>
+
+                <div class="border-b border-black py-2.5 text-xs">
+                  <div class="text-[9px] font-bold text-gray-500 uppercase tracking-wide">Куда / To:</div>
+                  <div v-if="printLabelData.customer" class="space-y-0.5">
+                    <div class="font-extrabold text-sm text-gray-900">
+                      {{ printLabelData.customer.last_name }} {{ printLabelData.customer.first_name }}
+                    </div>
+                    <div class="font-mono font-bold text-primary text-xs">{{ printLabelData.customer.customer_code }}</div>
+                    <div class="text-gray-600" v-if="printLabelData.customer.phone">{{ printLabelData.customer.phone }}</div>
+                  </div>
+                  <div v-else class="text-red-500 font-bold italic">Unknown Recipient</div>
+                </div>
+
+                <!-- Weight / Date -->
+                <div class="border-b border-black py-2.5 grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span class="text-[9px] font-bold text-gray-500 uppercase tracking-wide block">Вес / Weight:</span>
+                    <span class="font-extrabold text-gray-900">{{ printLabelData.weight ? printLabelData.weight + ' кг' : '—' }}</span>
+                  </div>
+                  <div>
+                    <span class="text-[9px] font-bold text-gray-500 uppercase tracking-wide block">Дата / Date:</span>
+                    <span class="font-extrabold text-gray-900">{{ formatDate(printLabelData.created_at) }}</span>
+                  </div>
+                </div>
+
+                <!-- Barcode area -->
+                <div class="py-4 text-center">
+                  <svg id="barcode-svg" class="mx-auto"></svg>
+                  <div class="text-lg font-black font-mono tracking-widest text-black mt-2">
+                    {{ printLabelData.tracking_number }}
+                  </div>
+                </div>
+
+                <!-- Footer info -->
+                <div class="border-t border-black pt-2 text-[9px] text-center font-bold text-gray-500 uppercase">
+                  Cargo Express 66 · Быстрая доставка
+                </div>
+              </div>
+
+              <!-- Action buttons -->
+              <div class="flex gap-3 mt-5">
+                <button type="button" @click="showPrintLabelModal = false" class="btn btn-ghost flex-1 border border-gray-200">
+                  Закрыть
+                </button>
+                <button type="button" @click="printLabel" class="btn btn-primary flex-1 flex items-center justify-center gap-1">
+                  <span>🖨️ Печать</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </transition>
+    </Teleport>
   </div>
 </template>
 
 <script>
 import { parcelsAPI, warehousesAPI, scannerAPI, tariffsAPI, servicesAPI } from '@/api/index.js'
 import StatusBadge from '@/components/common/StatusBadge.vue'
+import JsBarcode from 'jsbarcode'
 
 export default {
   name: 'AdminShipmentsPage',
@@ -289,6 +380,16 @@ export default {
       showModal: false,
       isEdit: false,
       editingId: null,
+
+      isNoTrack: false,
+      showPrintLabelModal: false,
+      printLabelData: {
+        tracking_number: '',
+        weight: null,
+        created_at: '',
+        warehouse_name: '',
+        customer: null
+      },
 
       search: '',
       statusFilter: '',
@@ -429,8 +530,9 @@ export default {
       this.loadParcels()
     },
 
-    openCreateModal() {
+    openCreateModal(isNoTrack = false) {
       this.isEdit = false
+      this.isNoTrack = isNoTrack
       this.editingId = null
       this.selectedCustomer = null
       this.customerQuery = ''
@@ -450,6 +552,7 @@ export default {
 
     openEditModal(p) {
       this.isEdit = true
+      this.isNoTrack = false
       this.editingId = p.id
       this.selectedCustomer = p.customers || null
       this.customerQuery = ''
@@ -468,6 +571,110 @@ export default {
         additional_services: selectedServices
       }
       this.showModal = true
+    },
+
+    openPrintLabel(parcel) {
+      // Find the warehouse in state
+      const wh = this.warehouses.find(w => w.id === parcel.warehouse_id)
+      const whName = wh ? `${wh.name} (${wh.country})` : 'Main Warehouse'
+      
+      this.printLabelData = {
+        tracking_number: parcel.tracking_number,
+        weight: parcel.weight,
+        created_at: parcel.created_at || new Date().toISOString(),
+        warehouse_name: whName,
+        customer: parcel.customers || this.selectedCustomer || null
+      }
+      
+      this.showPrintLabelModal = true
+      
+      this.$nextTick(() => {
+        JsBarcode("#barcode-svg", parcel.tracking_number, {
+          format: "CODE128",
+          width: 2,
+          height: 60,
+          displayValue: false,
+          margin: 0
+        })
+      })
+    },
+
+    printLabel() {
+      const printContent = document.getElementById('printable-label').innerHTML;
+      const win = window.open('', '_blank');
+      win.document.write(`
+        <html>
+          <head>
+            <title>Печать этикетки - ${this.printLabelData.tracking_number}</title>
+            <style>
+              @page { size: 100mm 150mm; margin: 0; }
+              body {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                margin: 0;
+                padding: 10px;
+                box-sizing: border-box;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+              }
+              #printable-label {
+                border: 2px solid #000;
+                padding: 15px;
+                border-radius: 8px;
+                width: 90mm;
+                height: 140mm;
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+              }
+              .border-b-2 { border-bottom: 2px solid #000; }
+              .border-b { border-bottom: 1px solid #000; }
+              .border-t { border-top: 1px solid #000; }
+              .pb-2 { padding-bottom: 8px; }
+              .py-2\\.5 { padding-top: 10px; padding-bottom: 10px; }
+              .py-4 { padding-top: 16px; padding-bottom: 16px; }
+              .pt-2 { padding-top: 8px; }
+              .text-sm { font-size: 14px; }
+              .text-xs { font-size: 12px; }
+              .text-\[9px\] { font-size: 9px; }
+              .text-\[10px\] { font-size: 10px; }
+              .text-lg { font-size: 18px; }
+              .font-black { font-weight: 900; }
+              .font-extrabold { font-weight: 800; }
+              .font-bold { font-weight: 700; }
+              .font-semibold { font-weight: 600; }
+              .font-medium { font-weight: 500; }
+              .uppercase { text-transform: uppercase; }
+              .tracking-wider { letter-spacing: 0.05em; }
+              .tracking-widest { letter-spacing: 0.1em; }
+              .text-gray-500 { color: #6b7280; }
+              .text-gray-600 { color: #4b5563; }
+              .text-gray-800 { color: #1f2937; }
+              .text-gray-900 { color: #111827; }
+              .text-primary-700 { color: #1d4ed8; }
+              .text-red-500 { color: #ef4444; }
+              .font-mono { font-family: monospace; }
+              .mx-auto { margin-left: auto; margin-right: auto; }
+              .text-center { text-align: center; }
+              .flex { display: flex; }
+              .justify-between { justify-content: space-between; }
+              .items-center { align-items: center; }
+              .grid { display: grid; }
+              .grid-cols-2 { grid-template-cols: repeat(2, minmax(0, 1fr)); }
+              .gap-2 { gap: 8px; }
+              .space-y-0\.5 > * + * { margin-top: 2px; }
+              svg { display: block; margin: 0 auto; max-width: 100%; }
+            </style>
+          </head>
+          <body onload="window.print(); window.close();">
+            <div id="printable-label">
+              ${printContent}
+            </div>
+          </body>
+        </html>
+      `);
+      win.document.close();
     },
 
     async searchCustomers() {
@@ -509,6 +716,12 @@ export default {
     async saveParcel() {
       this.saving = true
       try {
+        // Auto generate tracking number if in isNoTrack mode
+        if (this.isNoTrack && !this.isEdit) {
+          const randomDigits = Array.from({ length: 12 }, () => Math.floor(Math.random() * 10)).join('');
+          this.form.tracking_number = 'RND' + randomDigits;
+        }
+
         // If a customer is selected, status cannot be unknown_recipient
         if (this.selectedCustomer && this.form.status === 'unknown_recipient') {
           this.form.status = 'received_at_warehouse'
@@ -526,18 +739,25 @@ export default {
           service_ids: this.form.additional_services
         }
 
+        let savedParcel = null;
+
         if (this.isEdit) {
           // General fields update
           await parcelsAPI.update(this.editingId, payload)
           // Status update
           await parcelsAPI.updateStatus(this.editingId, this.form.status)
         } else {
-          await parcelsAPI.create(payload)
+          const r = await parcelsAPI.create(payload)
+          savedParcel = r.data.data || r.data
         }
 
         alert('Успешно сохранено!')
         this.showModal = false
         this.loadParcels()
+
+        if (savedParcel) {
+          this.openPrintLabel(savedParcel)
+        }
       } catch (e) {
         alert(e.response?.data?.error || 'Ошибка при сохранении')
       } finally {
