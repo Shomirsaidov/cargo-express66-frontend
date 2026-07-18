@@ -202,6 +202,53 @@
                   </div>
                 </div>
 
+                <!-- Additional Services (Admin-Side) -->
+                <div class="form-group" v-if="availableServices.length > 0">
+                  <label class="form-label font-bold text-gray-700">Дополнительные услуги:</label>
+                  <div class="space-y-2 mt-2 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                    <div v-for="service in availableServices" :key="service.id" class="flex items-start">
+                      <input type="checkbox" :id="'admin_service_' + service.id" :value="service.id" v-model="form.additional_services"
+                        class="rounded border-gray-300 text-primary focus:ring-primary w-4 h-4 mr-2 mt-0.5 cursor-pointer" />
+                      <label :for="'admin_service_' + service.id" class="text-sm text-gray-700 cursor-pointer select-none flex-1">
+                        <span class="font-medium text-gray-900">{{ getServiceNameRu(service.name) }}</span>
+                        <span class="text-gray-400 font-medium ml-1">
+                          ({{ service.price_type === 'percentage' ? service.percentage + '%' : '+$' + service.price }})
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Declared value input (if Insurance is selected) -->
+                <div v-if="isInsuranceSelected" class="form-group bg-blue-50 border border-blue-100 p-3 rounded-lg">
+                  <label class="form-label text-blue-900">Стоимость товара ($) *</label>
+                  <input v-model.number="form.declared_value" type="number" step="0.1" min="0" required class="input-field border-blue-200 focus:border-primary"
+                    placeholder="Введите стоимость для страховки..." />
+                </div>
+
+                <!-- Cost Breakdown for Admin -->
+                <div class="bg-gray-50 rounded-xl p-4 space-y-2 border border-gray-100">
+                  <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Расчет стоимости</h4>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">Доставка:</span>
+                    <span class="font-semibold text-gray-900">
+                      ${{ deliveryCost.toFixed(2) }}
+                    </span>
+                  </div>
+                  <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">Дополнительные услуги:</span>
+                    <span class="font-semibold text-gray-900">${{ additionalServicesCost.toFixed(2) }}</span>
+                  </div>
+                  <div v-if="isInsuranceSelected" class="flex justify-between text-sm">
+                    <span class="text-gray-600">Страхование:</span>
+                    <span class="font-semibold text-gray-900">${{ insuranceCost.toFixed(2) }}</span>
+                  </div>
+                  <div class="flex justify-between text-base font-bold pt-2 border-t border-gray-200">
+                    <span class="text-gray-800">Итого:</span>
+                    <span class="text-primary">${{ totalCost.toFixed(2) }}</span>
+                  </div>
+                </div>
+
                 <div>
                   <label class="form-label">Заметки:</label>
                   <textarea v-model="form.notes" rows="2" class="input-field"></textarea>
@@ -225,7 +272,7 @@
 </template>
 
 <script>
-import { parcelsAPI, warehousesAPI, scannerAPI } from '@/api/index.js'
+import { parcelsAPI, warehousesAPI, scannerAPI, tariffsAPI, servicesAPI } from '@/api/index.js'
 import StatusBadge from '@/components/common/StatusBadge.vue'
 
 export default {
@@ -272,6 +319,15 @@ export default {
       customerQuery: '',
       customerResults: [],
 
+      availableServices: [
+        { id: 'f8b65003-8d46-4ab5-8e46-db4e4e1b6789', name: 'Inspection', description: 'Проверить товар (+$5)', price: 5, price_type: 'fixed', is_active: true },
+        { id: '11111111-2222-3333-4444-555555555555', name: 'Photo', description: 'Сделать фото (+$2)', price: 2, price_type: 'fixed', is_active: true },
+        { id: 'fa976004-9e57-4c06-8f57-eb5e5e2c7890', name: 'Functionality Check', description: 'Проверить работоспособность (+$10)', price: 10, price_type: 'fixed', is_active: true },
+        { id: '22222222-3333-4444-5555-666666666666', name: 'Additional Packaging', description: 'Дополнительная упаковка (+$2)', price: 2, price_type: 'fixed', is_active: true },
+        { id: 'e7a54f02-7c35-49a4-ad35-cf3f3f0a5678', name: 'Insurance', description: 'Страхование груза (2%)', price: 0, price_type: 'percentage', percentage: 2, is_active: true }
+      ],
+      tariffs: [],
+
       form: {
         tracking_number: '',
         warehouse_id: '',
@@ -279,8 +335,45 @@ export default {
         dimensions: '',
         declared_value: '',
         status: 'awaiting_arrival',
-        notes: ''
+        notes: '',
+        additional_services: []
       }
+    }
+  },
+
+  computed: {
+    isInsuranceSelected() {
+      const insuranceService = this.availableServices.find(s => s.name.toLowerCase().includes('insurance'));
+      return insuranceService && this.form.additional_services.includes(insuranceService.id);
+    },
+    insuranceCost() {
+      if (!this.isInsuranceSelected) return 0;
+      const insuranceService = this.availableServices.find(s => s.name.toLowerCase().includes('insurance'));
+      if (!insuranceService) return 0;
+      const value = parseFloat(this.form.declared_value) || 0;
+      return (value * parseFloat(insuranceService.percentage)) / 100;
+    },
+    additionalServicesCost() {
+      let sum = 0;
+      this.form.additional_services.forEach(id => {
+        const service = this.availableServices.find(s => s.id === id);
+        if (service && service.price_type === 'fixed') {
+          sum += parseFloat(service.price) || 0;
+        }
+      });
+      return sum;
+    },
+    deliveryCost() {
+      const weight = parseFloat(this.form.weight) || 0;
+      if (!weight) return 0;
+      const wh = this.warehouses.find(w => w.id === this.form.warehouse_id);
+      if (!wh || !wh.country) return 0;
+      const tariff = this.tariffs.find(t => t.country.toLowerCase() === wh.country.toLowerCase() && t.is_active);
+      if (!tariff) return 0;
+      return Math.max(weight * parseFloat(tariff.price_per_kg), parseFloat(tariff.minimum_charge));
+    },
+    totalCost() {
+      return this.deliveryCost + this.additionalServicesCost + this.insuranceCost;
     }
   },
 
@@ -349,7 +442,8 @@ export default {
         dimensions: '',
         declared_value: '',
         status: 'awaiting_arrival',
-        notes: ''
+        notes: '',
+        additional_services: []
       }
       this.showModal = true
     },
@@ -360,6 +454,9 @@ export default {
       this.selectedCustomer = p.customers || null
       this.customerQuery = ''
       this.customerResults = []
+      
+      const selectedServices = p.parcel_services ? p.parcel_services.map(ps => ps.service_id) : [];
+
       this.form = {
         tracking_number: p.tracking_number,
         warehouse_id: p.warehouse_id,
@@ -367,7 +464,8 @@ export default {
         dimensions: p.dimensions || '',
         declared_value: p.declared_value || '',
         status: p.status,
-        notes: p.notes || ''
+        notes: p.notes || '',
+        additional_services: selectedServices
       }
       this.showModal = true
     },
@@ -424,7 +522,8 @@ export default {
           dimensions: this.form.dimensions,
           declared_value: this.form.declared_value ? parseFloat(this.form.declared_value) : null,
           notes: this.form.notes,
-          status: this.form.status
+          status: this.form.status,
+          service_ids: this.form.additional_services
         }
 
         if (this.isEdit) {
@@ -462,6 +561,21 @@ export default {
   async mounted() {
     await this.loadWarehouses()
     this.loadParcels()
+    try {
+      const t = await tariffsAPI.getAll()
+      this.tariffs = (t.data.data || t.data || []).filter(trf => trf.is_active)
+    } catch (e) {
+      this.tariffs = []
+    }
+    try {
+      const s = await servicesAPI.getAll()
+      const fetched = (s.data.data || s.data || []).filter(srv => srv.is_active)
+      if (fetched.length > 0) {
+        this.availableServices = fetched
+      }
+    } catch (e) {
+      console.error('Failed to load services, using fallback:', e)
+    }
   }
 }
 </script>

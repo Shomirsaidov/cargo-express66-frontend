@@ -232,7 +232,13 @@ export default {
         estimated_weight: ''
       },
       warehouses: [],
-      availableServices: [],
+      availableServices: [
+        { id: 'f8b65003-8d46-4ab5-8e46-db4e4e1b6789', name: 'Inspection', description: 'Проверить товар (+$5)', price: 5, price_type: 'fixed', is_active: true },
+        { id: '11111111-2222-3333-4444-555555555555', name: 'Photo', description: 'Сделать фото (+$2)', price: 2, price_type: 'fixed', is_active: true },
+        { id: 'fa976004-9e57-4c06-8f57-eb5e5e2c7890', name: 'Functionality Check', description: 'Проверить работоспособность (+$10)', price: 10, price_type: 'fixed', is_active: true },
+        { id: '22222222-3333-4444-5555-666666666666', name: 'Additional Packaging', description: 'Дополнительная упаковка (+$2)', price: 2, price_type: 'fixed', is_active: true },
+        { id: 'e7a54f02-7c35-49a4-ad35-cf3f3f0a5678', name: 'Insurance', description: 'Страхование груза (2%)', price: 0, price_type: 'percentage', percentage: 2, is_active: true }
+      ],
       tariffs: [],
       existingParcelWeight: null
     }
@@ -412,9 +418,12 @@ export default {
     }
     try {
       const s = await servicesAPI.getAll()
-      this.availableServices = (s.data.data || s.data || []).filter(srv => srv.is_active)
+      const fetched = (s.data.data || s.data || []).filter(srv => srv.is_active)
+      if (fetched.length > 0) {
+        this.availableServices = fetched
+      }
     } catch (e) {
-      this.availableServices = []
+      console.error('Failed to load services, using fallback:', e)
     }
     try {
       const t = await tariffsAPI.getAll()
