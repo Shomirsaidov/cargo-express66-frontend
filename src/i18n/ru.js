@@ -13,7 +13,9 @@ export default {
     login: 'Войти',
     register: 'Регистрация',
     logout: 'Выйти',
-    additionalServices: 'Доп. услуги'
+    additionalServices: 'Доп. услуги',
+    shopsUsa: 'Магазины США',
+    shopsGermany: 'Магазины Германии'
   },
   auth: {
     email: 'Email',

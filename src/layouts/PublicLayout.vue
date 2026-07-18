@@ -107,6 +107,8 @@
               <li><RouterLink to="/tracking" class="text-sm text-gray-400 hover:text-primary transition-colors no-underline">{{ $t('nav.tracking') }}</RouterLink></li>
               <li><RouterLink to="/calculator" class="text-sm text-gray-400 hover:text-primary transition-colors no-underline">{{ $t('nav.calculator') }}</RouterLink></li>
               <li><RouterLink to="/faq" class="text-sm text-gray-400 hover:text-primary transition-colors no-underline">{{ $t('nav.faq') }}</RouterLink></li>
+              <li><RouterLink to="/shops-usa" class="text-sm text-gray-400 hover:text-primary transition-colors no-underline">{{ $t('nav.shopsUsa') }}</RouterLink></li>
+              <li><RouterLink to="/shops-germany" class="text-sm text-gray-400 hover:text-primary transition-colors no-underline">{{ $t('nav.shopsGermany') }}</RouterLink></li>
             </ul>
           </div>
           <div>
@@ -159,6 +161,8 @@ export default {
         { to: '/how-it-works', label: this.$t('nav.howItWorks') },
         { to: '/pricing', label: this.$t('nav.pricing') },
         { to: '/services', label: this.$t('nav.additionalServices') },
+        { to: '/shops-usa', label: this.$t('nav.shopsUsa') },
+        { to: '/shops-germany', label: this.$t('nav.shopsGermany') },
         { to: '/tracking', label: this.$t('nav.tracking') },
         { to: '/calculator', label: this.$t('nav.calculator') },
         { to: '/contacts', label: this.$t('nav.contacts') },

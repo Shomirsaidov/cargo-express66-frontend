@@ -15,6 +15,8 @@ const PrivacyPage = () => import('@/views/public/PrivacyPage.vue')
 const LoginPage = () => import('@/views/public/LoginPage.vue')
 const RegisterPage = () => import('@/views/public/RegisterPage.vue')
 const ServicesPage = () => import('@/views/public/ServicesPage.vue')
+const ShopsUsaPage = () => import('@/views/public/ShopsUsaPage.vue')
+const ShopsGermanyPage = () => import('@/views/public/ShopsGermanyPage.vue')
 
 // Client views
 const ClientDashboard = () => import('@/views/client/DashboardPage.vue')
@@ -58,6 +60,8 @@ const routes = [
       { path: 'how-it-works', name: 'how-it-works', component: HowItWorksPage },
       { path: 'pricing', name: 'pricing', component: PricingPage },
       { path: 'services', name: 'services', component: ServicesPage },
+      { path: 'shops-usa', name: 'shops-usa', component: ShopsUsaPage },
+      { path: 'shops-germany', name: 'shops-germany', component: ShopsGermanyPage },
       { path: 'tracking', name: 'tracking', component: TrackingPage },
       { path: 'calculator', name: 'calculator', component: CalculatorPage },
       { path: 'contacts', name: 'contacts', component: ContactsPage },

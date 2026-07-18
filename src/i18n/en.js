@@ -13,7 +13,9 @@ export default {
     login: 'Login',
     register: 'Register',
     logout: 'Logout',
-    additionalServices: 'Services'
+    additionalServices: 'Services',
+    shopsUsa: 'USA Shops',
+    shopsGermany: 'Germany Shops'
   },
   auth: {
     email: 'Email',
