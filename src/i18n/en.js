@@ -215,9 +215,9 @@ export default {
     date: 'Date'
   },
   home: {
-    heroTitle: 'Delivery from USA & Germany',
+    heroTitle: 'Delivery from USA & Europe',
     heroSubtitle: 'to Tajikistan',
-    heroDesc: 'Fast, reliable, and affordable delivery of goods. We collect your purchases from US and German stores and deliver them straight to your door.',
+    heroDesc: 'Fast, reliable, and affordable delivery of goods. We collect your purchases from US and European stores and deliver them straight to your door.',
     trackBtn: 'Track Package',
     calculateBtn: 'Calculate Cost',
     feature1Title: 'Fast Delivery',

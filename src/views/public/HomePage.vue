@@ -10,7 +10,7 @@
         <div class="max-w-3xl">
           <div class="inline-flex items-center gap-2 bg-white bg-opacity-20 rounded-full px-4 py-2 text-sm font-medium mb-6">
             <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-            USA → Tajikistan &amp; Germany → Tajikistan
+            USA → Tajikistan &amp; Europe → Tajikistan
           </div>
           <h1 class="text-4xl lg:text-6xl font-bold mb-4 leading-tight">
             {{ $t('home.heroTitle') }}<br>
