@@ -694,10 +694,38 @@ export default {
       
       try {
         const r = await scannerAPI.scanParcel(trackNum)
-        if (r.data?.data?.customer) {
-          this.selectedCustomer = r.data.data.customer
-        } else if (r.data?.data?.parcel?.customers) {
-          this.selectedCustomer = r.data.data.parcel.customers
+        const data = r.data?.data
+        
+        if (data && data.action === 'pre_registered') {
+          if (data.customer) {
+            this.selectedCustomer = data.customer
+          }
+          if (data.tracking_record) {
+            const tr = data.tracking_record
+            if (tr.warehouse_id) this.form.warehouse_id = tr.warehouse_id
+            if (tr.notes) this.form.notes = tr.notes
+            if (tr.declared_value) this.form.declared_value = tr.declared_value
+            if (Array.isArray(tr.additional_services)) {
+              this.form.additional_services = tr.additional_services
+            }
+          }
+        } else if (data && data.action === 'found') {
+          const p = data.parcel
+          this.selectedCustomer = p.customers || null
+          this.form.warehouse_id = p.warehouse_id
+          this.form.weight = p.weight || ''
+          this.form.dimensions = p.dimensions || ''
+          this.form.declared_value = p.declared_value || ''
+          this.form.status = p.status
+          this.form.notes = p.notes || ''
+          if (p.parcel_services) {
+            this.form.additional_services = p.parcel_services.map(ps => ps.service_id)
+          }
+        } else if (data && data.customer) {
+          // Fallback simple link
+          this.selectedCustomer = data.customer
+        } else if (data && data.parcel?.customers) {
+          this.selectedCustomer = data.parcel.customers
         }
       } catch (e) {
         console.error('Failed to lookup tracking number:', e)
