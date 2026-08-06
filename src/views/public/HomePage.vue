@@ -426,6 +426,37 @@
       </div>
     </section>
 
+    <!-- FAQ Section -->
+    <section id="faq" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <span class="bg-primary-50 text-primary border border-primary-200 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
+          Частые вопросы
+        </span>
+        <h2 class="text-3xl font-extrabold text-gray-900 mt-3 mb-2">{{ $t('nav.faq') }}</h2>
+        <p class="text-gray-500">Ответы на популярные вопросы о доставке и тарифах</p>
+      </div>
+
+      <div class="space-y-3">
+        <div v-for="(item, index) in faqs" :key="index"
+          class="card border border-gray-100 hover:border-primary-100 transition-all cursor-pointer p-5 rounded-2xl shadow-sm"
+          @click="toggleFaq(index)">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-gray-900 text-base pr-4">{{ item.q }}</h3>
+            <svg class="w-5 h-5 text-gray-400 flex-shrink-0 transition-transform"
+              :class="{ 'rotate-180': faqOpenIndex === index }"
+              fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </div>
+          <transition name="slide-up">
+            <p v-if="faqOpenIndex === index" class="mt-3 text-gray-600 text-sm leading-relaxed border-t border-gray-100 pt-3">
+              {{ item.a }}
+            </p>
+          </transition>
+        </div>
+      </div>
+    </section>
+
     <!-- Quick Track -->
     <section id="tracking" class="py-16 bg-gray-50">
       <div class="max-w-2xl mx-auto px-4 text-center">
@@ -501,6 +532,16 @@ export default {
         { icon: '🎧', name: 'AirPods Max', price: '$25' },
         { icon: '📖', name: 'E-book', price: '$15' },
         { icon: '🎮', name: 'PlayStation 5 / Xbox', sub: 'по согласованию', price: 'по весу' }
+      ],
+      faqOpenIndex: null,
+      faqs: [
+        { q: 'Как узнать адрес склада в США?', a: 'Адреса наших складов приема в США указаны в личном кабинете. Для интернет-покупок используйте безналоговый склад в штате Делавэр: 465 Carson drive, Bear, Delaware 19701, указав свой ID клиента.' },
+        { q: 'Сколько стоит доставка?', a: 'Стоимость доставки обычного груза по весу составляет: до 100 кг – $16/кг, от 100 кг – $15/кг, от 1000 кг – $11/кг. Для техники действуют фиксированные тарифы (например, MacBook/ноутбуки/iPhone – $100, iPad – $70, AirPods – $20, часы – $30).' },
+        { q: 'Как долго идёт посылка?', a: 'Доставка из США занимает 6-10 рабочих дней, из Германии, Испании и Италии — 7-14 рабочих дней. Сроки зависят от расписания авиарейсов и скорости таможенного оформления.' },
+        { q: 'Как рассчитывается вес и округление?', a: 'Вес до 1 кг округляется до 1 кг (например, 0.4 кг рассчитывается как 1 кг). Если вес составляет 1.0 кг и выше (например, 1.2 кг или 2.8 кг), расчет ведется строго по фактическому весу.' },
+        { q: 'Как отследить посылку?', a: 'Вы можете ввести трек-номер на странице отслеживания или отслеживать все свои посылки в личном кабинете после регистрации.' },
+        { q: 'Что нельзя отправлять?', a: 'Запрещены оружие, боеприпасы, лекарства без рецепта, опасные жидкости, литиевые аккумуляторы отдельно от приборов, алкоголь и табачные изделия. Полный список смотрите на странице Условий.' },
+        { q: 'Есть ли страхование?', a: 'Да, вы можете застраховать вашу посылку. Стоимость страховки составляет 2% от объявленной ценности товара. Это гарантирует возмещение в случае утери груза.' }
       ]
     }
   },
@@ -532,6 +573,9 @@ export default {
       } else {
         this.$router.push({ name: 'tracking' })
       }
+    },
+    toggleFaq(index) {
+      this.faqOpenIndex = this.faqOpenIndex === index ? null : index
     },
     isServiceSelected(id) {
       return this.calcForm.services.includes(id)
