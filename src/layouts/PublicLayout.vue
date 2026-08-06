@@ -12,10 +12,67 @@
 
           <!-- Desktop Nav Links -->
           <div class="hidden lg:flex items-center gap-1">
-            <RouterLink v-for="link in navLinks" :key="link.to" :to="link.to"
-              class="px-3 py-2 text-sm font-medium text-gray-600 hover:text-primary rounded-md hover:bg-primary-50 transition-all no-underline">
-              {{ link.label }}
+            <RouterLink to="/" class="px-3 py-2 text-sm font-medium text-gray-600 hover:text-primary rounded-md hover:bg-primary-50 transition-all no-underline" active-class="text-primary bg-primary-50">
+              {{ $t('nav.home') }}
             </RouterLink>
+            
+            <RouterLink to="/pricing" class="px-3 py-2 text-sm font-medium text-gray-600 hover:text-primary rounded-md hover:bg-primary-50 transition-all no-underline" active-class="text-primary bg-primary-50">
+              {{ $t('nav.pricing') }}
+            </RouterLink>
+
+            <RouterLink to="/services" class="px-3 py-2 text-sm font-medium text-gray-600 hover:text-primary rounded-md hover:bg-primary-50 transition-all no-underline" active-class="text-primary bg-primary-50">
+              {{ $t('nav.additionalServices') }}
+            </RouterLink>
+
+            <RouterLink to="/tracking" class="px-3 py-2 text-sm font-medium text-gray-600 hover:text-primary rounded-md hover:bg-primary-50 transition-all no-underline" active-class="text-primary bg-primary-50">
+              {{ $t('nav.tracking') }}
+            </RouterLink>
+
+            <RouterLink to="/calculator" class="px-3 py-2 text-sm font-medium text-gray-600 hover:text-primary rounded-md hover:bg-primary-50 transition-all no-underline" active-class="text-primary bg-primary-50">
+              {{ $t('nav.calculator') }}
+            </RouterLink>
+
+            <!-- Dropdown: Popular Shops -->
+            <div class="relative group">
+              <button class="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-600 hover:text-primary rounded-md hover:bg-primary-50 transition-all focus:outline-none">
+                <span>{{ $t('nav.popularShops') }}</span>
+                <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </button>
+              <div class="absolute left-0 top-full mt-1 hidden group-hover:block w-48 bg-white border border-gray-100 rounded-xl shadow-lg py-1.5 z-50">
+                <RouterLink to="/shops-usa" class="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary transition-colors no-underline">
+                  🇺🇸 {{ $t('nav.shopsUsa') }}
+                </RouterLink>
+                <RouterLink to="/shops-germany" class="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary transition-colors no-underline">
+                  🇩🇪 {{ $t('nav.shopsGermany') }}
+                </RouterLink>
+              </div>
+            </div>
+
+            <!-- Dropdown: About Company -->
+            <div class="relative group">
+              <button class="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-600 hover:text-primary rounded-md hover:bg-primary-50 transition-all focus:outline-none">
+                <span>{{ $t('nav.aboutCompany') }}</span>
+                <svg class="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </button>
+              <div class="absolute right-0 top-full mt-1 hidden group-hover:block w-52 bg-white border border-gray-100 rounded-xl shadow-lg py-1.5 z-50">
+                <RouterLink to="/about" class="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary transition-colors no-underline">
+                  {{ $t('nav.about') }}
+                </RouterLink>
+                <RouterLink to="/how-it-works" class="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary transition-colors no-underline">
+                  {{ $t('nav.howItWorks') }}
+                </RouterLink>
+                <RouterLink to="/contacts" class="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary transition-colors no-underline">
+                  {{ $t('nav.contacts') }}
+                </RouterLink>
+                <RouterLink to="/faq" class="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary transition-colors no-underline">
+                  {{ $t('nav.faq') }}
+                </RouterLink>
+              </div>
+            </div>
           </div>
 
           <!-- Right side -->

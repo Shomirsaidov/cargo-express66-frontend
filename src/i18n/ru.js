@@ -15,7 +15,9 @@ export default {
     logout: 'Выйти',
     additionalServices: 'Доп. услуги',
     shopsUsa: 'Магазины США',
-    shopsGermany: 'Магазины Германии'
+    shopsGermany: 'Магазины Германии',
+    aboutCompany: 'О компании',
+    popularShops: 'Магазины'
   },
   auth: {
     email: 'Email',
