@@ -72,8 +72,18 @@
               class="bg-white rounded-2xl border border-gray-150 p-6 hover:shadow-md hover:border-primary-300 transition-all duration-300 flex flex-col justify-between group">
               <div>
                 <div class="flex items-start justify-between mb-4">
-                  <span class="text-3xl">{{ shop.emoji }}</span>
-                  <span class="text-[10px] font-semibold text-primary bg-primary-50 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  <!-- Real Logo with clean border and fallbacks -->
+                  <div class="w-12 h-12 flex items-center justify-center rounded-xl bg-gray-50 border border-gray-100 overflow-hidden relative">
+                    <img v-if="!shop.logoFailed" 
+                      :src="'https://logo.tomba.io/' + getDomain(shop.url)" 
+                      @error="handleLogoError($event, shop)"
+                      :alt="shop.name" 
+                      class="w-full h-full object-contain p-1" />
+                    <span v-else class="text-lg font-bold text-primary uppercase">
+                      {{ shop.name.charAt(0) }}
+                    </span>
+                  </div>
+                  <span class="text-[10px] font-semibold text-primary bg-primary-50 px-2 py-0.5 rounded-full uppercase tracking-wider self-start">
                     {{ getCategoryLabel(shop.category) }}
                   </span>
                 </div>
@@ -201,6 +211,9 @@ export default {
       ]
     }
   },
+  created() {
+    this.shops = this.shops.map(shop => ({ ...shop, logoFailed: false }));
+  },
   computed: {
     filteredShops() {
       let result = this.shops;
@@ -226,6 +239,24 @@ export default {
     getCategoryLabel(categoryVal) {
       const match = this.categories.find(c => c.value === categoryVal);
       return match ? match.label : '';
+    },
+    getDomain(url) {
+      try {
+        return new URL(url).hostname.replace('www.', '');
+      } catch (e) {
+        return '';
+      }
+    },
+    handleLogoError(event, shop) {
+      const domain = this.getDomain(shop.url);
+      const currentSrc = event.target.src;
+      if (currentSrc.includes('tomba.io')) {
+        event.target.src = `https://logos.hunter.io/${domain}`;
+      } else if (currentSrc.includes('hunter.io')) {
+        event.target.src = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+      } else {
+        shop.logoFailed = true;
+      }
     }
   }
 }
