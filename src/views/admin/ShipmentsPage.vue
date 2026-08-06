@@ -201,6 +201,17 @@
                   <input v-model="form.recipient_name" type="text" class="input-field" placeholder="ФИО получателя в Таджикистане (необязательно)" />
                 </div>
 
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="form-label">Описание товара:</label>
+                    <input v-model="form.product_description" type="text" class="input-field" placeholder="Одежда, обувь..." />
+                  </div>
+                  <div>
+                    <label class="form-label">Ссылка на товар:</label>
+                    <input v-model="form.product_link" type="url" class="input-field" placeholder="https://..." />
+                  </div>
+                </div>
+
                 <!-- Client Search Selector -->
                 <div>
                   <label class="form-label">Назначить клиента:</label>
@@ -451,7 +462,9 @@ export default {
         status: 'awaiting_arrival',
         notes: '',
         additional_services: [],
-        recipient_name: ''
+        recipient_name: '',
+        product_description: '',
+        product_link: ''
       }
     }
   },
@@ -563,7 +576,9 @@ export default {
         status: 'awaiting_arrival',
         notes: '',
         additional_services: [],
-        recipient_name: ''
+        recipient_name: '',
+        product_description: '',
+        product_link: ''
       }
       this.showModal = true
     },
@@ -587,7 +602,9 @@ export default {
         status: p.status,
         notes: p.notes || '',
         additional_services: selectedServices,
-        recipient_name: p.recipient_name || ''
+        recipient_name: p.recipient_name || '',
+        product_description: p.product_description || '',
+        product_link: p.product_link || ''
       }
       this.showModal = true
     },
@@ -723,6 +740,8 @@ export default {
           if (data.tracking_record) {
             const tr = data.tracking_record
             if (tr.recipient_name) this.form.recipient_name = tr.recipient_name
+            if (tr.product_description) this.form.product_description = tr.product_description
+            if (tr.product_link) this.form.product_link = tr.product_link
             if (tr.warehouse_id) this.form.warehouse_id = tr.warehouse_id
             if (tr.notes) this.form.notes = tr.notes
             if (tr.declared_value) this.form.declared_value = tr.declared_value
@@ -740,6 +759,8 @@ export default {
           this.form.status = p.status
           this.form.notes = p.notes || ''
           this.form.recipient_name = p.recipient_name || ''
+          this.form.product_description = p.product_description || ''
+          this.form.product_link = p.product_link || ''
           if (p.parcel_services) {
             this.form.additional_services = p.parcel_services.map(ps => ps.service_id)
           }
@@ -787,7 +808,9 @@ export default {
           notes: this.form.notes,
           status: this.form.status,
           service_ids: this.form.additional_services,
-          recipient_name: this.form.recipient_name || null
+          recipient_name: this.form.recipient_name || null,
+          product_description: this.form.product_description || null,
+          product_link: this.form.product_link || null
         }
 
         let savedParcel = null;

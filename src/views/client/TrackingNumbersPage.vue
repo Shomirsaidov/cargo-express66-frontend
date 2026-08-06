@@ -105,6 +105,18 @@
                   </div>
 
                   <div class="form-group">
+                    <label class="form-label">Описание товара</label>
+                    <textarea v-model="form.product_description" rows="2" class="input-field resize-none"
+                      placeholder="Например: Обувь, куртка, электроника (необязательно)..."></textarea>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Ссылка на товар</label>
+                    <input v-model="form.product_link" type="url" class="input-field"
+                      placeholder="https://example.com/product (необязательно)" />
+                  </div>
+
+                  <div class="form-group">
                     <label class="form-label">{{ $t('tracking.countryOfOrigin') }}</label>
                     <select v-model="form.country_of_origin" class="input-field">
                       <option value="">Выберите страну</option>
@@ -235,6 +247,8 @@ export default {
         tracking_number: '',
         store_name: '',
         recipient_name: '',
+        product_description: '',
+        product_link: '',
         country_of_origin: '',
         warehouse_id: '',
         notes: '',
@@ -342,6 +356,8 @@ export default {
         tracking_number: '',
         store_name: '',
         recipient_name: '',
+        product_description: '',
+        product_link: '',
         country_of_origin: '',
         warehouse_id: '',
         notes: '',
@@ -358,6 +374,8 @@ export default {
         tracking_number: item.tracking_number,
         store_name: item.store_name || '',
         recipient_name: item.recipient_name || '',
+        product_description: item.product_description || '',
+        product_link: item.product_link || '',
         country_of_origin: item.country_of_origin || '',
         warehouse_id: item.warehouse_id || '',
         notes: item.notes || '',
@@ -384,6 +402,8 @@ export default {
           tracking_number: this.form.tracking_number,
           store_name: this.form.store_name,
           recipient_name: this.form.recipient_name,
+          product_description: this.form.product_description,
+          product_link: this.form.product_link,
           country_of_origin: this.form.country_of_origin,
           warehouse_id: this.form.warehouse_id,
           notes: this.form.notes,

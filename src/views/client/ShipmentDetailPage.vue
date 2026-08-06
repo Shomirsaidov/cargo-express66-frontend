@@ -150,6 +150,8 @@ export default {
         { label: this.$t('shipments.weight'), value: this.parcel.weight ? `${this.parcel.weight} кг` : null },
         { label: this.$t('shipments.warehouse'), value: this.parcel.warehouse_name },
         { label: 'Получатель', value: this.parcel.recipient_name },
+        { label: 'Описание товара', value: this.parcel.product_description },
+        { label: 'Ссылка на товар', value: this.parcel.product_link },
         { label: this.$t('shipments.arrivalDate'), value: this.formatDate(this.parcel.arrival_date) },
         { label: this.$t('shipments.shipmentDate'), value: this.formatDate(this.parcel.shipment_date) },
         { label: this.$t('shipments.deliveryDate'), value: this.formatDate(this.parcel.delivery_date) },
