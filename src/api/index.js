@@ -29,7 +29,20 @@ api.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
-      window.location.href = '/login'
+      
+      const hash = window.location.hash || ''
+      const isProtected = hash.startsWith('#/dashboard') || 
+                          hash.startsWith('#/admin') || 
+                          hash.startsWith('#/warehouse') || 
+                          hash.startsWith('#/profile') || 
+                          hash.startsWith('#/shipments') || 
+                          hash.startsWith('#/tracking-numbers') || 
+                          hash.startsWith('#/notifications') || 
+                          hash.startsWith('#/settings')
+                          
+      if (isProtected) {
+        window.location.hash = '/login'
+      }
     }
     return Promise.reject(error)
   }
