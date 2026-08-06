@@ -87,7 +87,8 @@ export default {
     addFirst: 'Добавьте первый номер отслеживания',
     confirmDelete: 'Удалить номер отслеживания?',
     usa: 'США',
-    germany: 'Германия'
+    germany: 'Германия',
+    spain: 'Испания'
   },
   notifications: {
     title: 'Уведомления',
@@ -140,7 +141,8 @@ export default {
     days: 'дней',
     selectCountry: 'Выберите страну',
     usa: 'США (6-10 дней)',
-    germany: 'Германия (7-14 дней)'
+    germany: 'Европа (Германия) (7-14 дней)',
+    spain: 'Европа (Испания) (7-14 дней)'
   },
   publicTracking: {
     title: 'Отслеживание посылки',

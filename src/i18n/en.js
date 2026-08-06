@@ -87,7 +87,8 @@ export default {
     addFirst: 'Add your first tracking number',
     confirmDelete: 'Delete tracking number?',
     usa: 'USA',
-    germany: 'Germany'
+    germany: 'Germany',
+    spain: 'Spain'
   },
   notifications: {
     title: 'Notifications',
@@ -140,7 +141,8 @@ export default {
     days: 'days',
     selectCountry: 'Select country',
     usa: 'USA (6-10 days)',
-    germany: 'Germany (7-14 days)'
+    germany: 'Europe (Germany) (7-14 days)',
+    spain: 'Europe (Spain) (7-14 days)'
   },
   publicTracking: {
     title: 'Track Your Package',

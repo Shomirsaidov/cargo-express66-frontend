@@ -122,6 +122,7 @@
                       <option value="">Выберите страну</option>
                       <option value="USA">🇺🇸 {{ $t('tracking.usa') }}</option>
                       <option value="Germany">🇩🇪 {{ $t('tracking.germany') }}</option>
+                      <option value="Spain">🇪🇸 {{ $t('tracking.spain') }}</option>
                     </select>
                   </div>
 
@@ -432,6 +433,7 @@ export default {
       if (!country) return ''
       if (country.toLowerCase().includes('usa') || country.toLowerCase() === 'usa') return '🇺🇸'
       if (country.toLowerCase().includes('germany') || country.toLowerCase().includes('german')) return '🇩🇪'
+      if (country.toLowerCase().includes('spain') || country.toLowerCase() === 'spain') return '🇪🇸'
       return '🌍'
     }
   },
