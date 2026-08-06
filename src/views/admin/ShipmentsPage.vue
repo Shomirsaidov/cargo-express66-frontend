@@ -82,6 +82,9 @@
                 <p class="text-[10px] font-mono text-primary font-semibold">{{ p.customers.customer_code }}</p>
               </div>
               <span v-else class="text-xs text-red-500 font-medium italic">Unknown Recipient</span>
+              <div v-if="p.recipient_name" class="mt-1 text-[10px] text-purple-600 bg-purple-50 px-1 rounded inline-block font-medium">
+                👤 Получатель: {{ p.recipient_name }}
+              </div>
             </td>
             <td class="text-xs text-gray-600">
               {{ p.warehouses ? `${p.warehouses.name} (${p.warehouses.country})` : '—' }}
@@ -190,6 +193,12 @@
                       </option>
                     </select>
                   </div>
+                </div>
+
+                <!-- Recipient name input -->
+                <div>
+                  <label class="form-label">Получатель (ФИО):</label>
+                  <input v-model="form.recipient_name" type="text" class="input-field" placeholder="ФИО получателя в Таджикистане (необязательно)" />
                 </div>
 
                 <!-- Client Search Selector -->
@@ -308,14 +317,17 @@
 
                 <div class="border-b border-black py-2.5 text-xs">
                   <div class="text-[9px] font-bold text-gray-500 uppercase tracking-wide">Куда / To:</div>
-                  <div v-if="printLabelData.customer" class="space-y-0.5">
-                    <div class="font-extrabold text-sm text-gray-900">
+                  <div class="space-y-0.5">
+                    <div v-if="printLabelData.customer" class="font-extrabold text-sm text-gray-900">
                       {{ printLabelData.customer.last_name }} {{ printLabelData.customer.first_name }}
                     </div>
-                    <div class="font-mono font-bold text-primary text-xs">{{ printLabelData.customer.customer_code }}</div>
-                    <div class="text-gray-600" v-if="printLabelData.customer.phone">{{ printLabelData.customer.phone }}</div>
+                    <div v-if="printLabelData.customer" class="font-mono font-bold text-primary text-xs">{{ printLabelData.customer.customer_code }}</div>
+                    <div v-if="printLabelData.recipient_name" class="font-bold text-xs text-purple-700">
+                      Получатель: {{ printLabelData.recipient_name }}
+                    </div>
+                    <div class="text-gray-600" v-if="printLabelData.customer && printLabelData.customer.phone">{{ printLabelData.customer.phone }}</div>
                   </div>
-                  <div v-else class="text-red-500 font-bold italic">Unknown Recipient</div>
+                  <div v-if="!printLabelData.customer && !printLabelData.recipient_name" class="text-red-500 font-bold italic">Unknown Recipient</div>
                 </div>
 
                 <!-- Weight / Date -->
@@ -388,7 +400,8 @@ export default {
         weight: null,
         created_at: '',
         warehouse_name: '',
-        customer: null
+        customer: null,
+        recipient_name: ''
       },
 
       search: '',
@@ -437,7 +450,8 @@ export default {
         declared_value: '',
         status: 'awaiting_arrival',
         notes: '',
-        additional_services: []
+        additional_services: [],
+        recipient_name: ''
       }
     }
   },
@@ -548,7 +562,8 @@ export default {
         declared_value: '',
         status: 'awaiting_arrival',
         notes: '',
-        additional_services: []
+        additional_services: [],
+        recipient_name: ''
       }
       this.showModal = true
     },
@@ -571,7 +586,8 @@ export default {
         declared_value: p.declared_value || '',
         status: p.status,
         notes: p.notes || '',
-        additional_services: selectedServices
+        additional_services: selectedServices,
+        recipient_name: p.recipient_name || ''
       }
       this.showModal = true
     },
@@ -586,7 +602,8 @@ export default {
         weight: parcel.weight,
         created_at: parcel.created_at || new Date().toISOString(),
         warehouse_name: whName,
-        customer: parcel.customers || this.selectedCustomer || null
+        customer: parcel.customers || this.selectedCustomer || null,
+        recipient_name: parcel.recipient_name || ''
       }
       
       this.showPrintLabelModal = true
@@ -705,6 +722,7 @@ export default {
           }
           if (data.tracking_record) {
             const tr = data.tracking_record
+            if (tr.recipient_name) this.form.recipient_name = tr.recipient_name
             if (tr.warehouse_id) this.form.warehouse_id = tr.warehouse_id
             if (tr.notes) this.form.notes = tr.notes
             if (tr.declared_value) this.form.declared_value = tr.declared_value
@@ -721,6 +739,7 @@ export default {
           this.form.declared_value = p.declared_value || ''
           this.form.status = p.status
           this.form.notes = p.notes || ''
+          this.form.recipient_name = p.recipient_name || ''
           if (p.parcel_services) {
             this.form.additional_services = p.parcel_services.map(ps => ps.service_id)
           }
@@ -767,7 +786,8 @@ export default {
           declared_value: this.form.declared_value ? parseFloat(this.form.declared_value) : null,
           notes: this.form.notes,
           status: this.form.status,
-          service_ids: this.form.additional_services
+          service_ids: this.form.additional_services,
+          recipient_name: this.form.recipient_name || null
         }
 
         let savedParcel = null;

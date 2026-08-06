@@ -47,6 +47,10 @@
                 class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded-full">
                 🏭 {{ item.warehouse_name }}
               </span>
+              <span v-if="item.recipient_name"
+                class="text-xs bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full">
+                👤 Получатель: {{ item.recipient_name }}
+              </span>
             </div>
             <p v-if="item.notes" class="text-xs text-gray-400 mt-1 truncate">{{ item.notes }}</p>
           </div>
@@ -92,6 +96,12 @@
                     <label class="form-label">{{ $t('tracking.storeName') }}</label>
                     <input v-model="form.store_name" type="text" class="input-field"
                       placeholder="Amazon, eBay, ASOS..." />
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Получатель (ФИО)</label>
+                    <input v-model="form.recipient_name" type="text" class="input-field"
+                      placeholder="ФИО получателя в Таджикистане (необязательно)" />
                   </div>
 
                   <div class="form-group">
@@ -224,6 +234,7 @@ export default {
       form: {
         tracking_number: '',
         store_name: '',
+        recipient_name: '',
         country_of_origin: '',
         warehouse_id: '',
         notes: '',
@@ -330,6 +341,7 @@ export default {
       this.form = {
         tracking_number: '',
         store_name: '',
+        recipient_name: '',
         country_of_origin: '',
         warehouse_id: '',
         notes: '',
@@ -345,6 +357,7 @@ export default {
       this.form = {
         tracking_number: item.tracking_number,
         store_name: item.store_name || '',
+        recipient_name: item.recipient_name || '',
         country_of_origin: item.country_of_origin || '',
         warehouse_id: item.warehouse_id || '',
         notes: item.notes || '',
@@ -370,6 +383,7 @@ export default {
         const payload = {
           tracking_number: this.form.tracking_number,
           store_name: this.form.store_name,
+          recipient_name: this.form.recipient_name,
           country_of_origin: this.form.country_of_origin,
           warehouse_id: this.form.warehouse_id,
           notes: this.form.notes,

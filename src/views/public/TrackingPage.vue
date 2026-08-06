@@ -70,6 +70,12 @@
               <span class="text-xs text-primary font-mono font-semibold">({{ parcel.customer.customer_code }})</span>
             </p>
           </div>
+          <div v-if="parcel.recipient_name">
+            <p class="text-xs text-gray-500">Получатель</p>
+            <p class="font-medium text-purple-700">
+              {{ parcel.recipient_name }}
+            </p>
+          </div>
         </div>
       </div>
 

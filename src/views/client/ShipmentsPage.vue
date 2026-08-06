@@ -53,6 +53,9 @@
               <span v-if="parcel.warehouse_name" class="text-xs text-gray-500">
                 🏭 {{ parcel.warehouse_name }}
               </span>
+              <span v-if="parcel.recipient_name" class="text-xs bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full">
+                👤 {{ parcel.recipient_name }}
+              </span>
               <span class="text-xs text-gray-400">
                 {{ formatDate(parcel.created_at) }}
               </span>
