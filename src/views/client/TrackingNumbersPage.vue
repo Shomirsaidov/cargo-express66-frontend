@@ -297,16 +297,15 @@ export default {
       return service.name;
     },
     calculateDeliveryCostForWeight(weight) {
-      if (!weight) return 0;
-      let country = this.form.country_of_origin;
-      if (!country && this.form.warehouse_id) {
-        const wh = this.warehouses.find(w => w.id === this.form.warehouse_id);
-        if (wh) country = wh.country;
+      if (!weight || weight <= 0) return 0;
+      const calculatedWeight = weight < 1.0 ? 1.0 : weight;
+      let rate = 16;
+      if (calculatedWeight >= 1000) {
+        rate = 11;
+      } else if (calculatedWeight >= 100) {
+        rate = 15;
       }
-      if (!country) return 0;
-      const tariff = this.tariffs.find(t => t.country.toLowerCase() === country.toLowerCase() && t.is_active);
-      if (!tariff) return 0;
-      return Math.max(weight * parseFloat(tariff.price_per_kg), parseFloat(tariff.minimum_charge));
+      return calculatedWeight * rate;
     },
     async checkExistingParcel() {
       const trackNum = this.form.tracking_number.trim();

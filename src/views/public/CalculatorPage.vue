@@ -2,7 +2,7 @@
   <div class="max-w-4xl mx-auto px-4 py-12">
     <div class="text-center mb-10">
       <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ $t('calculator.title') }}</h1>
-      <p class="text-gray-500">{{ $t('calculator.subtitle') }}</p>
+      <p class="text-gray-500">Рассчитайте ориентировочную стоимость доставки по новым тарифам</p>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -17,18 +17,48 @@
             <select v-model="form.country" class="input-field" required>
               <option value="">{{ $t('calculator.selectCountry') }}</option>
               <option value="usa">{{ $t('calculator.usa') }}</option>
-              <option value="germany">{{ $t('calculator.germany') }}</option>
+              <option value="germany">Европа (Германия)</option>
             </select>
           </div>
 
-          <!-- Weight -->
+          <!-- Cargo Type Select -->
           <div class="form-group">
+            <label class="form-label">Тип груза</label>
+            <select v-model="form.cargo_type" class="input-field" required>
+              <option value="regular">Обычный груз (расчет по весу)</option>
+              <option value="tech">Электроника / Техника (фикс. тариф)</option>
+            </select>
+          </div>
+
+          <!-- Tech Device Selection -->
+          <div class="form-group" v-if="form.cargo_type === 'tech'">
+            <label class="form-label">Выберите устройство</label>
+            <select v-model="form.tech_type" class="input-field" required>
+              <option value="">-- Выберите устройство --</option>
+              <option value="macbook">MacBook (меньше 3кг) — $100</option>
+              <option value="laptop">Ноутбук (меньше 3кг) — $100</option>
+              <option value="iphone">iPhone — $100</option>
+              <option value="watch">Apple Watch / Smart Watch — $30</option>
+              <option value="ipad">iPad — $70</option>
+              <option value="airpods">AirPods — $20</option>
+              <option value="meta_glasses">Meta Очки — $20</option>
+              <option value="airpods_max">AirPods Max — $25</option>
+              <option value="ebook">E-book — $15</option>
+              <option value="ps5_xbox">PlayStation 5 / Xbox Series X — по весу</option>
+            </select>
+          </div>
+
+          <!-- Weight (Required only if cargo is regular or ps5_xbox) -->
+          <div class="form-group" v-if="form.cargo_type === 'regular' || form.tech_type === 'ps5_xbox'">
             <label class="form-label">{{ $t('calculator.weight') }}</label>
             <div class="relative">
               <input v-model.number="form.weight" type="number" min="0.1" step="0.1" required
                 class="input-field pr-12" placeholder="0.0" />
               <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">кг</span>
             </div>
+            <p class="text-[10px] text-gray-400 mt-1 leading-relaxed">
+              * Вес округляется до 1 кг, если он менее 1 кг. Более 1 кг рассчитывается по фактическому весу.
+            </p>
           </div>
 
           <!-- Declared value -->
@@ -54,12 +84,14 @@
                   <p class="text-sm font-medium text-gray-800">{{ service.name }}</p>
                   <p class="text-xs text-gray-500">{{ service.description }}</p>
                 </div>
-                <span class="text-sm font-semibold text-primary">${{ service.price }}</span>
+                <span class="text-sm font-semibold text-primary">
+                  {{ service.price_type === 'percentage' ? service.percentage + '%' : '$' + service.price }}
+                </span>
               </label>
             </div>
           </div>
 
-          <button type="submit" :disabled="!form.country || !form.weight || loading"
+          <button type="submit" :disabled="!form.country || (form.cargo_type === 'regular' && !form.weight) || loading"
             class="btn btn-primary w-full btn-lg">
             <svg v-if="loading" class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
@@ -87,14 +119,19 @@
             </div>
           </div>
 
+          <!-- Alert for special items -->
+          <div v-if="form.cargo_type === 'tech' && form.tech_type === 'ps5_xbox'" class="mb-4 p-3 bg-yellow-50 text-yellow-800 text-xs rounded-xl border border-yellow-100">
+            <strong>Обратите внимание:</strong> Для PlayStation 5 и Xbox Series X тариф рассчитывается по фактическому весу либо согласовывается отдельно с администратором.
+          </div>
+
           <div class="space-y-3">
             <div class="flex justify-between items-center py-2 border-b border-gray-100">
-              <span class="text-sm text-gray-600">{{ $t('calculator.deliveryCost') }}</span>
+              <span class="text-sm text-gray-600">Стоимость доставки</span>
               <span class="font-semibold">${{ result.delivery_cost?.toFixed(2) }}</span>
             </div>
             <div v-if="result.insurance_cost > 0"
               class="flex justify-between items-center py-2 border-b border-gray-100">
-              <span class="text-sm text-gray-600">{{ $t('calculator.insuranceCost') }}</span>
+              <span class="text-sm text-gray-600">Страхование груза</span>
               <span class="font-semibold">${{ result.insurance_cost?.toFixed(2) }}</span>
             </div>
             <div v-if="result.services_cost > 0"
@@ -109,7 +146,7 @@
           </div>
 
           <RouterLink to="/register"
-            class="btn btn-primary w-full mt-6 no-underline">
+            class="btn btn-primary w-full mt-6 no-underline text-center justify-center">
             Зарегистрироваться и отправить
           </RouterLink>
         </div>
@@ -125,19 +162,32 @@
           <p class="text-gray-500">Заполните форму и нажмите "{{ $t('calculator.calculate') }}"</p>
         </div>
 
-        <!-- Tariff info -->
+        <!-- Tariff info summary -->
         <div class="mt-4 card">
-          <h3 class="font-semibold text-gray-800 mb-3">Тарифы</h3>
+          <h3 class="font-semibold text-gray-800 mb-3">Сетка тарифов (по весу)</h3>
           <div class="space-y-2">
-            <div v-for="tariff in tariffInfo" :key="tariff.country"
-              class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
               <div>
-                <p class="font-medium text-sm text-gray-800">{{ tariff.country }}</p>
-                <p class="text-xs text-gray-500">{{ tariff.time }}</p>
+                <p class="font-medium text-xs text-gray-800">До 100 кг</p>
               </div>
               <div class="text-right">
-                <p class="font-semibold text-primary text-sm">${{ tariff.price }}/кг</p>
-                <p class="text-xs text-gray-400">мин. ${{ tariff.min }}</p>
+                <p class="font-semibold text-primary text-xs">$16/кг</p>
+              </div>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div>
+                <p class="font-medium text-xs text-gray-800">От 100 кг</p>
+              </div>
+              <div class="text-right">
+                <p class="font-semibold text-primary text-xs">$15/кг</p>
+              </div>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div>
+                <p class="font-medium text-xs text-gray-800">От 1000 кг</p>
+              </div>
+              <div class="text-right">
+                <p class="font-semibold text-primary text-xs">$11/кг</p>
               </div>
             </div>
           </div>
@@ -157,6 +207,8 @@ export default {
     return {
       form: {
         country: '',
+        cargo_type: 'regular',
+        tech_type: '',
         weight: '',
         declared_value: 0,
         services: []
@@ -164,14 +216,11 @@ export default {
       result: null,
       loading: false,
       availableServices: [
-        { id: 'insurance', name: 'Страхование', description: 'Защита на случай повреждения', price: 5 },
-        { id: 'inspection', name: 'Осмотр посылки', description: 'Проверка содержимого', price: 3 },
-        { id: 'defect_check', name: 'Проверка дефектов', description: 'Фото при получении', price: 2 },
-        { id: 'photo', name: 'Фото-верификация', description: '5+ фотографий посылки', price: 2 }
-      ],
-      tariffInfo: [
-        { country: '🇺🇸 США', time: '6-10 дней', price: '8.00', min: '10' },
-        { country: '🇩🇪 Германия', time: '7-14 дней', price: '7.00', min: '8' }
+        { id: 'insurance', name: 'Страхование', description: 'Страховка (2% от стоимости)', price: 0, percentage: 2, price_type: 'percentage' },
+        { id: 'f8b65003-8d46-4ab5-8e46-db4e4e1b6789', name: 'Осмотр товара', description: 'Проверка содержимого', price: 5, price_type: 'fixed' },
+        { id: 'fa976004-9e57-4c06-8f57-eb5e5e2c7890', name: 'Проверка работоспособности', description: 'Проверка работоспособности приборов', price: 10, price_type: 'fixed' },
+        { id: '11111111-2222-3333-4444-555555555555', name: 'Сделать фото', description: 'Детальные фото товаров', price: 2, price_type: 'fixed' },
+        { id: '22222222-3333-4444-5555-666666666666', name: 'Дополнительная упаковка', description: 'Безопасная защитная упаковка', price: 2, price_type: 'fixed' }
       ]
     }
   },
@@ -184,16 +233,31 @@ export default {
     async calculate() {
       this.loading = true
       try {
-        // Try API first
+        // Prepare request payload matching new tech schema
         const response = await calculatorAPI.calculate({
           country: this.form.country,
-          weight: this.form.weight,
+          weight: this.form.cargo_type === 'tech' && this.form.tech_type !== 'ps5_xbox' ? 1.0 : this.form.weight,
           declared_value: this.form.declared_value,
-          services: this.form.services
+          service_ids: this.form.services,
+          item_type: this.form.cargo_type === 'tech' ? this.form.tech_type : 'regular'
         })
-        this.result = response.data
+        
+        // Map backend response fields
+        const backendData = response.data?.data || response.data
+        if (backendData) {
+          // Adjust response keys from backend API
+          this.result = {
+            delivery_cost: backendData.delivery_cost,
+            insurance_cost: backendData.services?.find(s => s.name?.toLowerCase().includes('insurance') || s.service_id === 'insurance')?.cost || 0,
+            services_cost: backendData.services?.filter(s => !s.name?.toLowerCase().includes('insurance') && s.service_id !== 'insurance').reduce((sum, s) => sum + s.cost, 0) || backendData.services_cost,
+            total: backendData.total_cost || backendData.total,
+            delivery_time: backendData.tariff?.delivery_time || (this.form.country === 'germany' ? '7-14 дней' : '6-10 дней')
+          }
+        } else {
+          this.result = this.calculateLocally()
+        }
       } catch (err) {
-        // Fallback local calculation
+        console.warn('API error, falling back to local calculation:', err)
         this.result = this.calculateLocally()
       } finally {
         this.loading = false
@@ -201,24 +265,51 @@ export default {
     },
 
     calculateLocally() {
-      const rates = { usa: { price: 8, min: 10, time: '6-10 дней' }, germany: { price: 7, min: 8, time: '7-14 дней' } }
-      const rate = rates[this.form.country]
-      if (!rate) return null
+      const weightVal = parseFloat(this.form.weight || 0)
+      let baseCost = 0
 
-      const delivery = Math.max(this.form.weight * rate.price, rate.min)
-      const insurance = this.form.services.includes('insurance')
-        ? (this.form.declared_value || 0) * 0.03
-        : 0
+      const techRates = {
+        macbook: 100,
+        laptop: 100,
+        iphone: 100,
+        watch: 30,
+        ipad: 70,
+        airpods: 20,
+        meta_glasses: 20,
+        airpods_max: 25,
+        ebook: 15
+      }
+
+      const isTechItem = this.form.cargo_type === 'tech' && this.form.tech_type !== 'ps5_xbox'
+      if (isTechItem && techRates[this.form.tech_type]) {
+        baseCost = techRates[this.form.tech_type]
+      } else {
+        // Enforce weight calculation logic locally
+        const calculatedWeight = weightVal < 1.0 ? 1.0 : weightVal
+        let rate = 16
+        if (calculatedWeight >= 1000) {
+          rate = 11
+        } else if (calculatedWeight >= 100) {
+          rate = 15
+        }
+        baseCost = calculatedWeight * rate
+      }
+
+      // Calculate insurance
+      const isInsurance = this.form.services.includes('insurance')
+      const insuranceCost = isInsurance ? (this.form.declared_value || 0) * 0.02 : 0
+
+      // Calculate other fixed services
       const servicesCost = this.availableServices
         .filter(s => this.form.services.includes(s.id) && s.id !== 'insurance')
-        .reduce((sum, s) => sum + s.price, 0)
+        .reduce((sum, s) => sum + (parseFloat(s.price) || 0), 0)
 
       return {
-        delivery_cost: delivery,
-        insurance_cost: insurance,
+        delivery_cost: baseCost,
+        insurance_cost: insuranceCost,
         services_cost: servicesCost,
-        total: delivery + insurance + servicesCost,
-        delivery_time: rate.time
+        total: baseCost + insuranceCost + servicesCost,
+        delivery_time: this.form.country === 'germany' ? '7-14 дней' : '6-10 дней'
       }
     }
   },
@@ -226,8 +317,20 @@ export default {
   mounted() {
     // Load services from API if available
     servicesAPI.getAll().then(r => {
-      if (r.data && r.data.length > 0) {
-        this.availableServices = r.data
+      const fetched = r.data?.data || r.data || []
+      if (fetched.length > 0) {
+        // Map services but retain fallback IDs for local fallback
+        this.availableServices = fetched.map(fs => {
+          const isIns = fs.name?.toLowerCase().includes('insurance') || fs.price_type === 'percentage'
+          return {
+            id: fs.id,
+            name: fs.name,
+            description: fs.description || (isIns ? 'Страховка (2% от стоимости)' : ''),
+            price: parseFloat(fs.price) || 0,
+            percentage: parseFloat(fs.percentage) || 2,
+            price_type: fs.price_type || (isIns ? 'percentage' : 'fixed')
+          }
+        })
       }
     }).catch(() => {})
   }

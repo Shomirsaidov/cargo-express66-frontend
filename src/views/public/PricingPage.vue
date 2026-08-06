@@ -1,59 +1,152 @@
 <template>
-  <div class="max-w-4xl mx-auto px-4 py-12">
+  <div class="max-w-5xl mx-auto px-4 py-12">
+    <!-- Header -->
     <div class="text-center mb-12">
-      <h1 class="text-3xl font-bold text-gray-900 mb-3">{{ $t('nav.pricing') }}</h1>
-      <p class="text-gray-500 text-lg">Прозрачные тарифы без скрытых платежей</p>
+      <span class="bg-primary-50 text-primary border border-primary-200 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
+        Тарифная сетка
+      </span>
+      <h1 class="text-3xl lg:text-4xl font-extrabold text-gray-900 mt-3 mb-4">
+        Цены и оплата услуг
+      </h1>
+      <p class="text-gray-500 text-base max-w-2xl mx-auto">
+        Действуют с <strong>16 апреля 2026 года</strong>. Простые, прозрачные и понятные тарифы на доставку грузов из США и Европы в Таджикистан (Душанбе, Худжанд).
+      </p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-      <div v-for="tariff in tariffs" :key="tariff.country"
-        class="card border-2 hover:border-primary transition-all">
-        <div class="flex items-center gap-3 mb-6">
-          <span class="text-4xl">{{ tariff.flag }}</span>
-          <div>
-            <h2 class="text-xl font-bold">{{ tariff.country }}</h2>
-            <p class="text-gray-500 text-sm">{{ tariff.route }}</p>
+    <!-- Tier-based weight section -->
+    <div class="bg-gradient-to-br from-primary-800 to-primary-600 rounded-3xl p-8 text-white shadow-xl mb-12 relative overflow-hidden">
+      <!-- Decorative background -->
+      <div class="absolute inset-0 opacity-10">
+        <div class="absolute -top-10 -left-10 w-48 h-48 rounded-full bg-white"></div>
+        <div class="absolute -bottom-10 -right-10 w-80 h-80 rounded-full bg-white"></div>
+      </div>
+      
+      <div class="relative z-10">
+        <h2 class="text-2xl font-bold mb-2">📦 Обычный груз (Тариф по весу)</h2>
+        <p class="text-blue-100 text-sm mb-8 max-w-xl">
+          Стоимость доставки за 1 кг зависит от общего веса вашей партии. Подходит для одежды, обуви, косметики и других стандартных товаров.
+        </p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="bg-white bg-opacity-10 backdrop-blur-md rounded-2xl p-6 border border-white border-opacity-10 hover:bg-opacity-15 transition-all">
+            <p class="text-xs text-blue-200 uppercase font-semibold tracking-wider">До 100 кг</p>
+            <p class="text-4xl font-black mt-2 mb-1">$16 <span class="text-lg font-normal">/ кг</span></p>
+            <p class="text-xs text-blue-100">Для небольших и средних посылок</p>
           </div>
-        </div>
-        <div class="space-y-3">
-          <div class="flex justify-between">
-            <span class="text-gray-600">Цена за кг</span>
-            <span class="font-bold text-primary text-lg">${{ tariff.price_per_kg }}</span>
+          
+          <div class="bg-white bg-opacity-10 backdrop-blur-md rounded-2xl p-6 border border-white border-opacity-10 hover:bg-opacity-15 transition-all">
+            <p class="text-xs text-blue-200 uppercase font-semibold tracking-wider">От 100 кг</p>
+            <p class="text-4xl font-black mt-2 mb-1">$15 <span class="text-lg font-normal">/ кг</span></p>
+            <p class="text-xs text-blue-100">Выгодный тариф для оптовых партий</p>
           </div>
-          <div class="flex justify-between">
-            <span class="text-gray-600">Минимальная оплата</span>
-            <span class="font-semibold">${{ tariff.min_charge }}</span>
+          
+          <div class="bg-white bg-opacity-10 backdrop-blur-md rounded-2xl p-6 border border-white border-opacity-10 hover:bg-opacity-15 transition-all">
+            <p class="text-xs text-blue-200 uppercase font-semibold tracking-wider">От 1000 кг</p>
+            <p class="text-4xl font-black mt-2 mb-1">$11 <span class="text-lg font-normal">/ кг</span></p>
+            <p class="text-xs text-blue-100">Крупногабаритные карго-поставки</p>
           </div>
-          <div class="flex justify-between">
-            <span class="text-gray-600">Срок доставки</span>
-            <span class="font-semibold">{{ tariff.time }}</span>
-          </div>
-        </div>
-        <div class="mt-6 pt-4 border-t border-gray-100">
-          <RouterLink :to="'/calculator'" class="btn btn-outline w-full no-underline">
-            Рассчитать стоимость
-          </RouterLink>
         </div>
       </div>
     </div>
 
-    <div class="card">
-      <h2 class="text-xl font-bold mb-4">Дополнительные услуги</h2>
-      <div class="overflow-x-auto">
-        <table class="min-w-full">
-          <thead>
-            <tr class="border-b border-gray-200">
-              <th class="text-left py-3 text-sm font-semibold text-gray-600">Услуга</th>
-              <th class="text-right py-3 text-sm font-semibold text-gray-600">Стоимость</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100">
-            <tr v-for="service in services" :key="service.name">
-              <td class="py-3 text-gray-800">{{ service.name }}</td>
-              <td class="py-3 text-right font-semibold text-primary">${{ service.price }}</td>
-            </tr>
-          </tbody>
-        </table>
+    <!-- Tech fixed tariffs -->
+    <div class="mb-12">
+      <div class="flex flex-col md:flex-row md:items-center justify-between mb-8">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900">📱 Фиксированные тарифы на технику</h2>
+          <p class="text-gray-500 text-sm mt-1">Доставка электроники осуществляется по фиксированной ставке за единицу</p>
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div v-for="tech in techTariffs" :key="tech.name" 
+          class="bg-white p-5 rounded-2xl border border-gray-150 text-center hover:border-primary-300 hover:shadow-sm transition-all flex flex-col justify-between">
+          <div>
+            <span class="text-3xl block mb-2">{{ tech.icon }}</span>
+            <h3 class="font-bold text-gray-800 text-sm leading-tight mb-1">{{ tech.name }}</h3>
+            <p class="text-[10px] text-gray-400 leading-tight" v-if="tech.sub">{{ tech.sub }}</p>
+          </div>
+          <div class="mt-4">
+            <span class="text-xl font-extrabold text-primary">{{ tech.price }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rules and Guidelines -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+      <!-- Rounding & Volume Cargo -->
+      <div class="space-y-6">
+        <div class="card p-6 border border-gray-150">
+          <div class="flex gap-4">
+            <span class="text-3xl">⚖️</span>
+            <div>
+              <h3 class="font-bold text-lg text-gray-900 mb-2">Правила округления веса</h3>
+              <p class="text-sm text-gray-600 leading-relaxed mb-2">
+                • Вес <strong>до 1 кг</strong> округляется в большую сторону до 1 кг. Например, если товар весит 0.4 кг, стоимость рассчитывается как за 1 кг ($16).
+              </p>
+              <p class="text-sm text-gray-600 leading-relaxed">
+                • Если товар весит <strong>1.0 кг и более</strong> (например, 1.2 кг или 2.8 кг), расчет ведется строго по фактическому весу без округлений.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card p-6 border border-gray-150">
+          <div class="flex gap-4">
+            <span class="text-3xl">📦</span>
+            <div>
+              <h3 class="font-bold text-lg text-gray-900 mb-2">Объемный вес (Крупногабаритные товары)</h3>
+              <p class="text-sm text-gray-600 leading-relaxed mb-3">
+                Некоторые товары из-за своих размеров рассчитываются по объемному весу (если он превышает фактический). К ним относятся:
+              </p>
+              <div class="grid grid-cols-2 gap-2 text-xs text-gray-700">
+                <div class="flex items-center gap-1.5">• Телевизоры</div>
+                <div class="flex items-center gap-1.5">• Стиральные машины</div>
+                <div class="flex items-center gap-1.5">• Пианино и муз. установки</div>
+                <div class="flex items-center gap-1.5">• Большие тренажеры</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment & Important Notes -->
+      <div class="space-y-6">
+        <div class="card p-6 border border-gray-150">
+          <div class="flex gap-4">
+            <span class="text-3xl">💳</span>
+            <div>
+              <h3 class="font-bold text-lg text-gray-900 mb-3">Способы оплаты</h3>
+              <ul class="space-y-2.5 text-sm text-gray-600">
+                <li class="flex items-center gap-2">
+                  <span class="text-primary font-bold">✔</span> Наличными при получении (в Душанбе)
+                </li>
+                <li class="flex items-center gap-2">
+                  <span class="text-primary font-bold">✔</span> Банковский перевод (по согласованию)
+                </li>
+                <li class="flex items-center gap-2">
+                  <span class="text-primary font-bold">✔</span> Оплата через Zelle / CashApp (только для клиентов из США)
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="card p-6 border border-gray-150 bg-gray-50 border-dashed">
+          <div class="flex gap-4">
+            <span class="text-3xl">📌</span>
+            <div>
+              <h3 class="font-bold text-lg text-gray-900 mb-2">Важно знать</h3>
+              <p class="text-sm text-gray-600 leading-relaxed mb-3">
+                Указанные тарифы включают доставку в города <strong>Душанбе</strong> и <strong>Худжанд</strong>. При необходимости отправки в другие регионы возможны дополнительные транспортные расходы.
+              </p>
+              <RouterLink to="/calculator" class="btn btn-primary w-full no-underline justify-center text-center">
+                Перейти в калькулятор
+              </RouterLink>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -64,16 +157,17 @@ export default {
   name: 'PricingPage',
   data() {
     return {
-      tariffs: [
-        { flag: '🇺🇸', country: 'США', route: 'USA → Таджикистан', price_per_kg: '8.00', min_charge: '10', time: '6-10 дней' },
-        { flag: '🇩🇪', country: 'Германия', route: 'Germany → Таджикистан', price_per_kg: '7.00', min_charge: '8', time: '7-14 дней' }
-      ],
-      services: [
-        { name: 'Страхование (3% от стоимости)', price: 'от 3%' },
-        { name: 'Осмотр посылки', price: '3' },
-        { name: 'Проверка дефектов', price: '2' },
-        { name: 'Тест электроники', price: '5' },
-        { name: 'Фото-верификация', price: '2' }
+      techTariffs: [
+        { icon: '💻', name: 'MacBook', sub: 'меньше 3кг', price: '$100' },
+        { icon: '💻', name: 'Ноутбук', sub: 'меньше 3кг', price: '$100' },
+        { icon: '📱', name: 'iPhone', price: '$100' },
+        { icon: '⌚', name: 'Apple / Smart Watch', price: '$30' },
+        { icon: '📟', name: 'iPad', price: '$70' },
+        { icon: '🎧', name: 'AirPods', price: '$20' },
+        { icon: '🕶️', name: 'Meta Очки', price: '$20' },
+        { icon: '🎧', name: 'AirPods Max', price: '$25' },
+        { icon: '📖', name: 'E-book', price: '$15' },
+        { icon: '🎮', name: 'PlayStation 5 / Xbox', sub: 'по согласованию', price: 'по весу' }
       ]
     }
   }
