@@ -90,7 +90,8 @@ export default {
     confirmDelete: 'Delete tracking number?',
     usa: 'USA',
     germany: 'Germany',
-    spain: 'Spain'
+    spain: 'Spain',
+    italy: 'Italy'
   },
   notifications: {
     title: 'Notifications',
@@ -144,7 +145,8 @@ export default {
     selectCountry: 'Select country',
     usa: 'USA (6-10 days)',
     germany: 'Europe (Germany) (7-14 days)',
-    spain: 'Europe (Spain) (7-14 days)'
+    spain: 'Europe (Spain) (7-14 days)',
+    italy: 'Europe (Italy) (7-14 days)'
   },
   publicTracking: {
     title: 'Track Your Package',

@@ -90,7 +90,8 @@ export default {
     confirmDelete: 'Удалить номер отслеживания?',
     usa: 'США',
     germany: 'Германия',
-    spain: 'Испания'
+    spain: 'Испания',
+    italy: 'Италия'
   },
   notifications: {
     title: 'Уведомления',
@@ -144,7 +145,8 @@ export default {
     selectCountry: 'Выберите страну',
     usa: 'США (6-10 дней)',
     germany: 'Европа (Германия) (7-14 дней)',
-    spain: 'Европа (Испания) (7-14 дней)'
+    spain: 'Европа (Испания) (7-14 дней)',
+    italy: 'Европа (Италия) (7-14 дней)'
   },
   publicTracking: {
     title: 'Отслеживание посылки',

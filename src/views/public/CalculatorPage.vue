@@ -19,6 +19,7 @@
               <option value="usa">{{ $t('calculator.usa') }}</option>
               <option value="germany">{{ $t('calculator.germany') }}</option>
               <option value="spain">{{ $t('calculator.spain') }}</option>
+              <option value="italy">{{ $t('calculator.italy') }}</option>
             </select>
           </div>
 
@@ -310,7 +311,7 @@ export default {
         insurance_cost: insuranceCost,
         services_cost: servicesCost,
         total: baseCost + insuranceCost + servicesCost,
-        delivery_time: (this.form.country === 'germany' || this.form.country === 'spain') ? '7-14 дней' : '6-10 дней'
+        delivery_time: (this.form.country === 'germany' || this.form.country === 'spain' || this.form.country === 'italy') ? '7-14 дней' : '6-10 дней'
       }
     }
   },
