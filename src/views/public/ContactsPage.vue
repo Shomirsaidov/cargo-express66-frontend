@@ -152,7 +152,7 @@ export default {
         { 
           icon: '🛡️', 
           name: 'Delaware Main Warehouse', 
-          address: '465 Carson drive, Bear, Delaware 19701', 
+          address: '1680 Porter Rd, Suite A-3, Bear, DE 19701', 
           phone: '+1 (518) 528-4810', 
           phoneRaw: '+15185284810', 
           highlight: true,

@@ -171,3 +171,12 @@ export const scannerAPI = {
 export const calculatorAPI = {
   calculate: (data) => api.post('/calculator/calculate', data)
 }
+
+// Destination countries
+export const destinationCountriesAPI = {
+  getAll: () => api.get('/destination-countries'),
+  getOne: (id) => api.get(`/destination-countries/${id}`),
+  create: (data) => api.post('/destination-countries', data),
+  update: (id, data) => api.put(`/destination-countries/${id}`, data),
+  delete: (id) => api.delete(`/destination-countries/${id}`)
+}

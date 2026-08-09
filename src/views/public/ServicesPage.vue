@@ -98,6 +98,46 @@
             <span class="text-lg font-bold text-primary">2% от стоимости</span>
           </div>
         </div>
+
+        <!-- Card 6: Cargo/Warehouse Services -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 hover:shadow-md hover:border-primary-200 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden">
+          <div class="absolute top-0 right-0 bg-primary/10 text-primary text-[10px] uppercase font-extrabold px-3 py-1 rounded-bl-xl tracking-wider">
+            С 1 сентября
+          </div>
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-blue-50 text-primary flex items-center justify-center text-2xl mb-6 group-hover:bg-primary group-hover:text-white transition-all duration-300 mt-2">
+              🏢
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">Обслуживание для карго</h3>
+            <p class="text-xs text-gray-500 leading-relaxed mb-6">
+              Предоставляем складские и фулфилмент-услуги для карго и транспортных компаний. Принимаем и храним посылки ваших клиентов на нашем складе в США, консолидируем грузы, проверяем, переупаковываем и готовим к отправке.
+            </p>
+          </div>
+          <div class="flex items-center justify-between border-t border-gray-50 pt-4">
+            <span class="text-xs font-semibold text-gray-400">Стоимость</span>
+            <span class="text-sm font-bold text-primary">Индивидуально</span>
+          </div>
+        </div>
+
+        <!-- Card 7: Fulfillment for Online Sellers -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 hover:shadow-md hover:border-primary-200 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden">
+          <div class="absolute top-0 right-0 bg-primary/10 text-primary text-[10px] uppercase font-extrabold px-3 py-1 rounded-bl-xl tracking-wider">
+            С 1 сентября
+          </div>
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-blue-50 text-primary flex items-center justify-center text-2xl mb-6 group-hover:bg-primary group-hover:text-white transition-all duration-300 mt-2">
+              🛒
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">Фулфилмент селлерам</h3>
+            <p class="text-xs text-gray-500 leading-relaxed mb-6">
+              Предоставляем услуги хранения и обработки товаров для онлайн-селлеров и интернет-магазинов. Принимаем товар на склад в США, организуем хранение, ведем учет остатков, комплектуем, упаковываем и отправляем покупателям.
+            </p>
+          </div>
+          <div class="flex items-center justify-between border-t border-gray-50 pt-4">
+            <span class="text-xs font-semibold text-gray-400">Стоимость</span>
+            <span class="text-sm font-bold text-primary">Индивидуально</span>
+          </div>
+        </div>
       </div>
 
       <!-- How to Add Guide -->

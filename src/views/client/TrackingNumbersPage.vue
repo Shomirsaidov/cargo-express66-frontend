@@ -51,6 +51,10 @@
                 class="text-xs bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full">
                 👤 Получатель: {{ item.recipient_name }}
               </span>
+              <span v-if="item.destination_country"
+                class="text-xs bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full">
+                📍 Направление: {{ item.destination_country }}
+              </span>
             </div>
             <p v-if="item.notes" class="text-xs text-gray-400 mt-1 truncate">{{ item.notes }}</p>
           </div>
@@ -124,6 +128,16 @@
                       <option value="Germany">🇩🇪 {{ $t('tracking.germany') }}</option>
                       <option value="Spain">🇪🇸 {{ $t('tracking.spain') }}</option>
                       <option value="Italy">🇮🇹 {{ $t('tracking.italy') }}</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Страна назначения</label>
+                    <select v-model="form.destination_country" class="input-field">
+                      <option value="">Выберите страну назначения</option>
+                      <option v-for="c in destinationCountries" :key="c.id" :value="c.name">
+                        {{ c.name }}
+                      </option>
                     </select>
                   </div>
 
@@ -230,7 +244,7 @@
 
 <script>
 import { useTrackingStore } from '@/stores/tracking.js'
-import { warehousesAPI, servicesAPI, tariffsAPI, parcelsAPI } from '@/api/index.js'
+import { warehousesAPI, servicesAPI, tariffsAPI, parcelsAPI, destinationCountriesAPI } from '@/api/index.js'
 import ConfirmModal from '@/components/common/ConfirmModal.vue'
 
 export default {
@@ -256,9 +270,11 @@ export default {
         notes: '',
         additional_services: [],
         declared_value: 0,
-        estimated_weight: ''
+        estimated_weight: '',
+        destination_country: 'Таджикистан'
       },
       warehouses: [],
+      destinationCountries: [],
       availableServices: [
         { id: 'f8b65003-8d46-4ab5-8e46-db4e4e1b6789', name: 'Inspection', description: 'Проверить товар (+$5)', price: 5, price_type: 'fixed', is_active: true },
         { id: '11111111-2222-3333-4444-555555555555', name: 'Photo', description: 'Сделать фото (+$2)', price: 2, price_type: 'fixed', is_active: true },
@@ -365,7 +381,8 @@ export default {
         notes: '',
         additional_services: [],
         declared_value: 0,
-        estimated_weight: ''
+        estimated_weight: '',
+        destination_country: 'Таджикистан'
       }
       this.existingParcelWeight = null
       this.showModal = true
@@ -383,7 +400,8 @@ export default {
         notes: item.notes || '',
         additional_services: item.additional_services || [],
         declared_value: item.declared_value || 0,
-        estimated_weight: ''
+        estimated_weight: '',
+        destination_country: item.destination_country || 'Таджикистан'
       }
       this.showModal = true
       this.checkExistingParcel()
@@ -410,7 +428,8 @@ export default {
           warehouse_id: this.form.warehouse_id,
           notes: this.form.notes,
           additional_services: this.form.additional_services,
-          declared_value: this.form.declared_value
+          declared_value: this.form.declared_value,
+          destination_country: this.form.destination_country || 'Таджикистан'
         }
         if (this.editingItem) {
           result = await this.trackingStore.updateTrackingNumber(this.editingItem.id, payload)
@@ -455,6 +474,18 @@ export default {
       this.warehouses = r.data.data || r.data || []
     } catch (e) {
       this.warehouses = []
+    }
+    try {
+      const dc = await destinationCountriesAPI.getAll()
+      this.destinationCountries = (dc.data?.data || dc.data || []).filter(c => c.is_active)
+    } catch (e) {
+      this.destinationCountries = [
+        { id: '1', name: 'Таджикистан', is_active: true },
+        { id: '2', name: 'Узбекистан', is_active: true },
+        { id: '3', name: 'Азербайджан', is_active: true },
+        { id: '4', name: 'Казахстан', is_active: true },
+        { id: '5', name: 'Киргизия', is_active: true }
+      ]
     }
     try {
       const s = await servicesAPI.getAll()

@@ -85,6 +85,9 @@
               <div v-if="p.recipient_name" class="mt-1 text-[10px] text-purple-600 bg-purple-50 px-1 rounded inline-block font-medium">
                 👤 Получатель: {{ p.recipient_name }}
               </div>
+              <div v-if="p.destination_country" class="mt-1 text-[10px] text-blue-600 bg-blue-50 px-1 rounded inline-block font-medium">
+                📍 Направление: {{ p.destination_country }}
+              </div>
             </td>
             <td class="text-xs text-gray-600">
               {{ p.warehouses ? `${p.warehouses.name} (${p.warehouses.country})` : '—' }}
@@ -195,10 +198,20 @@
                   </div>
                 </div>
 
-                <!-- Recipient name input -->
-                <div>
-                  <label class="form-label">Получатель (ФИО):</label>
-                  <input v-model="form.recipient_name" type="text" class="input-field" placeholder="ФИО получателя в Таджикистане (необязательно)" />
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="form-label">Получатель (ФИО):</label>
+                    <input v-model="form.recipient_name" type="text" class="input-field" placeholder="ФИО получателя" />
+                  </div>
+                  <div>
+                    <label class="form-label">Страна назначения:</label>
+                    <select v-model="form.destination_country" class="input-field">
+                      <option value="">-- Выберите страну --</option>
+                      <option v-for="c in destinationCountries" :key="c.id" :value="c.name">
+                        {{ c.name }}
+                      </option>
+                    </select>
+                  </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
@@ -385,7 +398,7 @@
 </template>
 
 <script>
-import { parcelsAPI, warehousesAPI, scannerAPI, tariffsAPI, servicesAPI } from '@/api/index.js'
+import { parcelsAPI, warehousesAPI, scannerAPI, tariffsAPI, servicesAPI, destinationCountriesAPI } from '@/api/index.js'
 import StatusBadge from '@/components/common/StatusBadge.vue'
 import JsBarcode from 'jsbarcode'
 
@@ -398,6 +411,7 @@ export default {
     return {
       parcels: [],
       warehouses: [],
+      destinationCountries: [],
       loading: false,
       saving: false,
       showModal: false,
@@ -464,7 +478,8 @@ export default {
         additional_services: [],
         recipient_name: '',
         product_description: '',
-        product_link: ''
+        product_link: '',
+        destination_country: 'Таджикистан'
       }
     }
   },
@@ -578,7 +593,8 @@ export default {
         additional_services: [],
         recipient_name: '',
         product_description: '',
-        product_link: ''
+        product_link: '',
+        destination_country: 'Таджикистан'
       }
       this.showModal = true
     },
@@ -604,7 +620,8 @@ export default {
         additional_services: selectedServices,
         recipient_name: p.recipient_name || '',
         product_description: p.product_description || '',
-        product_link: p.product_link || ''
+        product_link: p.product_link || '',
+        destination_country: p.destination_country || 'Таджикистан'
       }
       this.showModal = true
     },
@@ -740,6 +757,7 @@ export default {
           if (data.tracking_record) {
             const tr = data.tracking_record
             if (tr.recipient_name) this.form.recipient_name = tr.recipient_name
+            if (tr.destination_country) this.form.destination_country = tr.destination_country
             if (tr.product_description) this.form.product_description = tr.product_description
             if (tr.product_link) this.form.product_link = tr.product_link
             if (tr.warehouse_id) this.form.warehouse_id = tr.warehouse_id
@@ -759,6 +777,7 @@ export default {
           this.form.status = p.status
           this.form.notes = p.notes || ''
           this.form.recipient_name = p.recipient_name || ''
+          this.form.destination_country = p.destination_country || 'Таджикистан'
           this.form.product_description = p.product_description || ''
           this.form.product_link = p.product_link || ''
           if (p.parcel_services) {
@@ -810,7 +829,8 @@ export default {
           service_ids: this.form.additional_services,
           recipient_name: this.form.recipient_name || null,
           product_description: this.form.product_description || null,
-          product_link: this.form.product_link || null
+          product_link: this.form.product_link || null,
+          destination_country: this.form.destination_country || 'Таджикистан'
         }
 
         let savedParcel = null;
@@ -869,6 +889,18 @@ export default {
       }
     } catch (e) {
       console.error('Failed to load services, using fallback:', e)
+    }
+    try {
+      const dc = await destinationCountriesAPI.getAll()
+      this.destinationCountries = (dc.data?.data || dc.data || []).filter(c => c.is_active)
+    } catch (e) {
+      this.destinationCountries = [
+        { id: '1', name: 'Таджикистан', is_active: true },
+        { id: '2', name: 'Узбекистан', is_active: true },
+        { id: '3', name: 'Азербайджан', is_active: true },
+        { id: '4', name: 'Казахстан', is_active: true },
+        { id: '5', name: 'Киргизия', is_active: true }
+      ]
     }
   }
 }
