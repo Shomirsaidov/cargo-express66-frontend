@@ -49,6 +49,66 @@
       </div>
     </div>
 
+    <!-- Scrollable Destinations Pricing Widget -->
+    <div class="mb-12 bg-gray-50/50 border border-gray-150 rounded-3xl p-8 shadow-sm">
+      <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900">🌍 Тарифы по направлениям доставки</h2>
+          <p class="text-sm text-gray-500 mt-1">Цены за авиадоставку обычного груза в Таджикистан (Душанбе, Худжанд)</p>
+        </div>
+        <div class="flex gap-2">
+          <button @click="scrollDirections('left')" class="w-8 h-8 rounded-full border border-gray-250 hover:border-primary hover:text-primary flex items-center justify-center transition-all bg-white text-gray-500">
+            ←
+          </button>
+          <button @click="scrollDirections('right')" class="w-8 h-8 rounded-full border border-gray-250 hover:border-primary hover:text-primary flex items-center justify-center transition-all bg-white text-gray-500">
+            →
+          </button>
+        </div>
+      </div>
+
+      <!-- Scrollable container -->
+      <div ref="directionsScroll" class="flex gap-4 overflow-x-auto pb-4 px-2 -mx-2 scroll-smooth snap-x snap-mandatory scrollbar-none">
+        <div v-for="d in directionsPricing" :key="d.country"
+          class="w-[280px] sm:w-[320px] flex-shrink-0 snap-start bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow group relative">
+          
+          <!-- Top Section -->
+          <div class="p-5">
+            <div class="flex items-center justify-between">
+              <span class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <span>{{ d.flag }}</span> {{ d.country }}
+              </span>
+              <span v-if="d.note" :title="d.note"
+                class="w-6 h-6 rounded-full bg-cyan-50 text-cyan-500 hover:bg-cyan-100 flex items-center justify-center text-xs font-serif font-bold cursor-help transition-all">
+                i
+              </span>
+            </div>
+            <div class="text-xs text-gray-400 mt-2 flex items-center gap-1.5 font-medium">
+              <span>⚖️</span> за 1 кг
+            </div>
+          </div>
+
+          <!-- Bottom Section (Dark Navy) -->
+          <div class="bg-[#1b2537] p-4 text-white flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/80 group-hover:scale-105 transition-all">
+                ✈
+              </div>
+              <div>
+                <p class="text-[9px] text-gray-400 uppercase tracking-widest font-black leading-tight">Авиа</p>
+                <p class="text-xs font-bold text-white flex items-center gap-1 mt-0.5">
+                  ⏱ ≈{{ d.time }}
+                </p>
+              </div>
+            </div>
+            <div class="text-lg font-black tracking-tight text-white">
+              {{ d.price }}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
     <!-- Tech fixed tariffs -->
     <div class="mb-12">
       <div class="flex flex-col md:flex-row md:items-center justify-between mb-8">
@@ -168,7 +228,26 @@ export default {
         { icon: '🎧', name: 'AirPods Max', price: '$25' },
         { icon: '📖', name: 'E-book', price: '$15' },
         { icon: '🎮', name: 'PlayStation 5 / Xbox', sub: 'по согласованию', price: 'по весу' }
+      ],
+      directionsPricing: [
+        { country: 'США', flag: '🇺🇸', time: '4-9 раб. дней', price: '$16', note: 'Прямые рейсы из Нью-Йорка и Филадельфии еженедельно. Обычный груз до 100 кг. От 100 кг – $15, от 1000 кг – $11.' },
+        { country: 'Англия', flag: '🇬🇧', time: '5-10 раб. дней', price: '$12', note: 'Доставка посылок и сборных грузов из Великобритании.' },
+        { country: 'Германия', flag: '🇩🇪', time: '2-6 раб. дней', price: '$12', note: 'Сборные грузы со всей Европы через склад в Мюнхене.' },
+        { country: 'Испания', flag: '🇪🇸', time: '7-14 раб. дней', price: '$12', note: 'Доставка посылок и товаров из Испании транзитом через Европу.' },
+        { country: 'Италия', flag: '🇮🇹', time: '7-14 раб. дней', price: '$12', note: 'Прямые поставки брендовой одежды и обуви из Италии.' }
       ]
+    }
+  },
+  methods: {
+    scrollDirections(dir) {
+      const container = this.$refs.directionsScroll;
+      if (!container) return;
+      const scrollAmount = 300;
+      if (dir === 'left') {
+        container.scrollLeft -= scrollAmount;
+      } else {
+        container.scrollLeft += scrollAmount;
+      }
     }
   }
 }
