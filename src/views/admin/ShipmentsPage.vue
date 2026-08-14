@@ -354,14 +354,27 @@
                 <div class="border-b border-black py-2.5 text-xs">
                   <div class="text-[9px] font-bold text-gray-500 uppercase tracking-wide">Куда / To:</div>
                   <div class="space-y-0.5">
-                    <div v-if="printLabelData.customer" class="font-extrabold text-sm text-gray-900">
-                      {{ printLabelData.customer.last_name }} {{ printLabelData.customer.first_name }}
+                    <!-- If recipient is the customer or no custom recipient is specified -->
+                    <template v-if="printLabelData.recipient_is_customer || !printLabelData.recipient_name">
+                      <div v-if="printLabelData.customer" class="font-extrabold text-sm text-gray-900">
+                        {{ printLabelData.customer.last_name }} {{ printLabelData.customer.first_name }}
+                      </div>
+                      <div v-if="printLabelData.customer" class="font-mono font-bold text-primary text-xs">
+                        {{ printLabelData.customer.customer_code }}
+                      </div>
+                    </template>
+                    <!-- If a custom recipient is specified -->
+                    <template v-else>
+                      <div class="font-extrabold text-sm text-gray-900">
+                        {{ printLabelData.recipient_name }}
+                      </div>
+                      <div v-if="printLabelData.customer" class="font-bold text-xs text-gray-500">
+                        Отправитель: {{ printLabelData.customer.last_name }} {{ printLabelData.customer.first_name }} ({{ printLabelData.customer.customer_code }})
+                      </div>
+                    </template>
+                    <div class="text-gray-650" v-if="printLabelData.customer && printLabelData.customer.phone">
+                      Тел: {{ printLabelData.customer.phone }}
                     </div>
-                    <div v-if="printLabelData.customer" class="font-mono font-bold text-primary text-xs">{{ printLabelData.customer.customer_code }}</div>
-                    <div v-if="printLabelData.recipient_name" class="font-bold text-xs text-purple-700">
-                      Получатель: {{ printLabelData.recipient_name }}
-                    </div>
-                    <div class="text-gray-600" v-if="printLabelData.customer && printLabelData.customer.phone">{{ printLabelData.customer.phone }}</div>
                   </div>
                   <div v-if="!printLabelData.customer && !printLabelData.recipient_name" class="text-red-500 font-bold italic">Unknown Recipient</div>
                 </div>
@@ -652,7 +665,8 @@ export default {
         created_at: parcel.created_at || new Date().toISOString(),
         warehouse_name: whName,
         customer: parcel.customers || this.selectedCustomer || null,
-        recipient_name: parcel.recipient_name || ''
+        recipient_name: parcel.recipient_name || '',
+        recipient_is_customer: !!parcel.recipient_is_customer
       }
       
       this.showPrintLabelModal = true
