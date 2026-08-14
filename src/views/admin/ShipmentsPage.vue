@@ -82,8 +82,8 @@
                 <p class="text-[10px] font-mono text-primary font-semibold">{{ p.customers.customer_code }}</p>
               </div>
               <span v-else class="text-xs text-red-500 font-medium italic">Unknown Recipient</span>
-              <div v-if="p.recipient_name" class="mt-1 text-[10px] text-purple-600 bg-purple-50 px-1 rounded inline-block font-medium">
-                👤 Получатель: {{ p.recipient_name }}
+              <div v-if="p.recipient_is_customer || p.recipient_name" class="mt-1 text-[10px] text-purple-600 bg-purple-50 px-1 rounded inline-block font-medium">
+                👤 Получатель: {{ p.recipient_is_customer ? (p.customers ? `${p.customers.first_name} ${p.customers.last_name} (Отправитель)` : 'Отправитель') : p.recipient_name }}
               </div>
               <div v-if="p.destination_country" class="mt-1 text-[10px] text-blue-600 bg-blue-50 px-1 rounded inline-block font-medium">
                 📍 Направление: {{ p.destination_country }}
@@ -201,7 +201,7 @@
                 <div class="grid grid-cols-2 gap-4">
                   <div>
                     <label class="form-label">Получатель (ФИО):</label>
-                    <input v-model="form.recipient_name" type="text" class="input-field" placeholder="ФИО получателя" />
+                    <input v-model="form.recipient_name" type="text" class="input-field" placeholder="ФИО получателя" :disabled="form.recipient_is_customer" />
                   </div>
                   <div>
                     <label class="form-label">Страна назначения:</label>
@@ -212,6 +212,18 @@
                       </option>
                     </select>
                   </div>
+                </div>
+
+                <div class="form-group my-3">
+                  <label class="flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox" v-model="form.recipient_is_customer"
+                      class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded"
+                      :disabled="!selectedCustomer" />
+                    <span class="text-sm font-medium text-gray-700">Получатель тот же, что и отправитель (клиент)</span>
+                  </label>
+                  <p v-if="!selectedCustomer" class="text-[10px] text-red-500 mt-1">
+                    * Для выбора этой опции необходимо назначить клиента
+                  </p>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
@@ -479,7 +491,8 @@ export default {
         recipient_name: '',
         product_description: '',
         product_link: '',
-        destination_country: 'Таджикистан'
+        destination_country: 'Таджикистан',
+        recipient_is_customer: false
       }
     }
   },
@@ -594,7 +607,8 @@ export default {
         recipient_name: '',
         product_description: '',
         product_link: '',
-        destination_country: 'Таджикистан'
+        destination_country: 'Таджикистан',
+        recipient_is_customer: false
       }
       this.showModal = true
     },
@@ -621,7 +635,8 @@ export default {
         recipient_name: p.recipient_name || '',
         product_description: p.product_description || '',
         product_link: p.product_link || '',
-        destination_country: p.destination_country || 'Таджикистан'
+        destination_country: p.destination_country || 'Таджикистан',
+        recipient_is_customer: !!p.recipient_is_customer
       }
       this.showModal = true
     },
@@ -758,6 +773,7 @@ export default {
             const tr = data.tracking_record
             if (tr.recipient_name) this.form.recipient_name = tr.recipient_name
             if (tr.destination_country) this.form.destination_country = tr.destination_country
+            this.form.recipient_is_customer = !!tr.recipient_is_customer
             if (tr.product_description) this.form.product_description = tr.product_description
             if (tr.product_link) this.form.product_link = tr.product_link
             if (tr.warehouse_id) this.form.warehouse_id = tr.warehouse_id
@@ -778,6 +794,7 @@ export default {
           this.form.notes = p.notes || ''
           this.form.recipient_name = p.recipient_name || ''
           this.form.destination_country = p.destination_country || 'Таджикистан'
+          this.form.recipient_is_customer = !!p.recipient_is_customer
           this.form.product_description = p.product_description || ''
           this.form.product_link = p.product_link || ''
           if (p.parcel_services) {
@@ -830,7 +847,8 @@ export default {
           recipient_name: this.form.recipient_name || null,
           product_description: this.form.product_description || null,
           product_link: this.form.product_link || null,
-          destination_country: this.form.destination_country || 'Таджикистан'
+          destination_country: this.form.destination_country || 'Таджикистан',
+          recipient_is_customer: this.form.recipient_is_customer
         }
 
         let savedParcel = null;

@@ -47,9 +47,9 @@
                 class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded-full">
                 🏭 {{ item.warehouse_name }}
               </span>
-              <span v-if="item.recipient_name"
+              <span v-if="item.recipient_is_customer || item.recipient_name"
                 class="text-xs bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full">
-                👤 Получатель: {{ item.recipient_name }}
+                👤 Получатель: {{ item.recipient_is_customer ? 'Отправитель (Вы)' : item.recipient_name }}
               </span>
               <span v-if="item.destination_country"
                 class="text-xs bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full">
@@ -105,7 +105,20 @@
                   <div class="form-group">
                     <label class="form-label">Получатель (ФИО)</label>
                     <input v-model="form.recipient_name" type="text" class="input-field"
-                      placeholder="ФИО получателя в Таджикистане (необязательно)" />
+                      placeholder="ФИО получателя в Таджикистане (необязательно)"
+                      :disabled="form.recipient_is_customer" />
+                  </div>
+
+                  <div class="form-group space-y-2">
+                    <label class="flex items-center gap-2 cursor-pointer select-none">
+                      <input type="checkbox" v-model="form.recipient_is_customer"
+                        class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded" />
+                      <span class="text-sm font-medium text-gray-700">Получатель тот же, что и отправитель</span>
+                      <span class="text-gray-400 text-xs border border-gray-300 rounded-full w-4 h-4 flex items-center justify-center font-serif cursor-help" title="Данные отправителя будут скопированы из вашего профиля">i</span>
+                    </label>
+                    <div v-if="form.recipient_is_customer" class="p-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl text-xs leading-relaxed">
+                      Если выбрать эту опцию, данные отправителя будут автоматически отображаться в строке получателя в отчётах.
+                    </div>
                   </div>
 
                   <div class="form-group">
@@ -271,7 +284,8 @@ export default {
         additional_services: [],
         declared_value: 0,
         estimated_weight: '',
-        destination_country: 'Таджикистан'
+        destination_country: 'Таджикистан',
+        recipient_is_customer: false
       },
       warehouses: [],
       destinationCountries: [],
@@ -382,7 +396,8 @@ export default {
         additional_services: [],
         declared_value: 0,
         estimated_weight: '',
-        destination_country: 'Таджикистан'
+        destination_country: 'Таджикистан',
+        recipient_is_customer: false
       }
       this.existingParcelWeight = null
       this.showModal = true
@@ -401,7 +416,8 @@ export default {
         additional_services: item.additional_services || [],
         declared_value: item.declared_value || 0,
         estimated_weight: '',
-        destination_country: item.destination_country || 'Таджикистан'
+        destination_country: item.destination_country || 'Таджикистан',
+        recipient_is_customer: !!item.recipient_is_customer
       }
       this.showModal = true
       this.checkExistingParcel()
@@ -429,7 +445,8 @@ export default {
           notes: this.form.notes,
           additional_services: this.form.additional_services,
           declared_value: this.form.declared_value,
-          destination_country: this.form.destination_country || 'Таджикистан'
+          destination_country: this.form.destination_country || 'Таджикистан',
+          recipient_is_customer: this.form.recipient_is_customer
         }
         if (this.editingItem) {
           result = await this.trackingStore.updateTrackingNumber(this.editingItem.id, payload)

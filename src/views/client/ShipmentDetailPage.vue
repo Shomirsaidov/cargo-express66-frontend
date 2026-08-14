@@ -149,7 +149,7 @@ export default {
       return [
         { label: this.$t('shipments.weight'), value: this.parcel.weight ? `${this.parcel.weight} кг` : null },
         { label: this.$t('shipments.warehouse'), value: this.parcel.warehouse_name },
-        { label: 'Получатель', value: this.parcel.recipient_name },
+        { label: 'Получатель', value: this.parcel.recipient_is_customer ? 'Отправитель (Вы)' : this.parcel.recipient_name },
         { label: 'Страна назначения', value: this.parcel.destination_country },
         { label: 'Описание товара', value: this.parcel.product_description },
         { label: 'Ссылка на товар', value: this.parcel.product_link },

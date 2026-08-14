@@ -53,8 +53,8 @@
               <span v-if="parcel.warehouse_name" class="text-xs text-gray-500">
                 🏭 {{ parcel.warehouse_name }}
               </span>
-              <span v-if="parcel.recipient_name" class="text-xs bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full">
-                👤 {{ parcel.recipient_name }}
+              <span v-if="parcel.recipient_is_customer || parcel.recipient_name" class="text-xs bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full">
+                👤 {{ parcel.recipient_is_customer ? 'Отправитель (Вы)' : parcel.recipient_name }}
               </span>
               <span v-if="parcel.destination_country" class="text-xs bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full">
                 📍 {{ parcel.destination_country }}
