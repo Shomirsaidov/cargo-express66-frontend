@@ -49,27 +49,19 @@
       </div>
     </div>
 
-    <!-- Scrollable Destinations Pricing Widget -->
-    <div class="mb-12 bg-gray-50/50 border border-gray-150 rounded-3xl p-8 shadow-sm">
+    <!-- Destinations Pricing Widget -->
+    <div class="mb-12">
       <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
           <h2 class="text-2xl font-bold text-gray-900">🌍 Тарифы по направлениям доставки</h2>
           <p class="text-sm text-gray-500 mt-1">Цены за авиадоставку обычного груза в Таджикистан (Душанбе, Худжанд)</p>
         </div>
-        <div class="flex gap-2">
-          <button @click="scrollDirections('left')" class="w-8 h-8 rounded-full border border-gray-250 hover:border-primary hover:text-primary flex items-center justify-center transition-all bg-white text-gray-500">
-            ←
-          </button>
-          <button @click="scrollDirections('right')" class="w-8 h-8 rounded-full border border-gray-250 hover:border-primary hover:text-primary flex items-center justify-center transition-all bg-white text-gray-500">
-            →
-          </button>
-        </div>
       </div>
 
-      <!-- Scrollable container -->
-      <div ref="directionsScroll" class="flex gap-4 overflow-x-auto pb-4 px-2 -mx-2 scroll-smooth snap-x snap-mandatory scrollbar-none">
+      <!-- Grid container (stacked on mobile, grid on desktop) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <div v-for="d in directionsPricing" :key="d.country"
-          class="w-[280px] sm:w-[320px] flex-shrink-0 snap-start bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow group relative">
+          class="w-full bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow group relative">
           
           <!-- Top Section -->
           <div class="p-5">
@@ -104,7 +96,6 @@
               {{ d.price }}
             </div>
           </div>
-
         </div>
       </div>
 
