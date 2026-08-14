@@ -107,6 +107,44 @@
 
         </div>
       </div>
+
+      <!-- Standalone Highlighted Direction for Kazakhstan -->
+      <div class="border-t border-gray-150 mt-6 pt-6">
+        <div class="bg-gradient-to-br from-slate-900 to-[#1e293b] rounded-2xl p-6 text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm border border-slate-800 relative overflow-hidden group">
+          <!-- Glow background effect -->
+          <div class="absolute inset-0 bg-gradient-to-r from-primary-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          
+          <div class="flex items-center gap-4 text-center sm:text-left flex-col sm:flex-row relative z-10">
+            <span class="text-4xl bg-white/10 w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0">🇰🇿</span>
+            <div>
+              <div class="flex flex-wrap items-center gap-2 justify-center sm:justify-start">
+                <span class="bg-primary/95 text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full">Спецнаправление</span>
+                <span class="bg-cyan-500/20 text-cyan-300 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full">Из США</span>
+              </div>
+              <h4 class="text-xl font-bold mt-1.5 flex items-center justify-center sm:justify-start gap-2">
+                США <span class="text-gray-400">→</span> Казахстан
+              </h4>
+              <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                Авиадоставка сборных грузов и посылок из США по направлению Казахстан.
+              </p>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-6 relative z-10 w-full sm:w-auto justify-center">
+            <div class="text-center sm:text-right">
+              <span class="text-[9px] text-slate-400 uppercase tracking-widest block font-bold">Сроки</span>
+              <span class="text-xs sm:text-sm font-bold flex items-center justify-center sm:justify-end gap-1 mt-0.5">
+                ⏱ ≈5-10 раб. дней
+              </span>
+            </div>
+            <div class="h-8 w-px bg-slate-700/60"></div>
+            <div class="text-center">
+              <span class="text-[9px] text-slate-400 uppercase tracking-widest block font-bold">Тариф за 1 кг</span>
+              <span class="text-xl sm:text-2xl font-black text-white">$12</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Tech fixed tariffs -->
@@ -234,8 +272,7 @@ export default {
         { country: 'Англия', flag: '🇬🇧', time: '5-10 раб. дней', price: '$12', note: 'Доставка посылок и сборных грузов из Великобритании.' },
         { country: 'Германия', flag: '🇩🇪', time: '2-6 раб. дней', price: '$12', note: 'Сборные грузы со всей Европы через склад в Мюнхене.' },
         { country: 'Испания', flag: '🇪🇸', time: '7-14 раб. дней', price: '$12', note: 'Доставка посылок и товаров из Испании транзитом через Европу.' },
-        { country: 'Италия', flag: '🇮🇹', time: '7-14 раб. дней', price: '$12', note: 'Прямые поставки брендовой одежды и обуви из Италии.' },
-        { country: 'Казахстан (из США)', flag: '🇰🇿', time: '5-10 раб. дней', price: '$12', note: 'Авиадоставка посылок из США по направлению Казахстан.' }
+        { country: 'Италия', flag: '🇮🇹', time: '7-14 раб. дней', price: '$12', note: 'Прямые поставки брендовой одежды и обуви из Италии.' }
       ]
     }
   },
