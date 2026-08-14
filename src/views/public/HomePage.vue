@@ -63,7 +63,7 @@
           О компании
         </span>
         <h2 class="text-3xl font-extrabold text-gray-900 mt-3 mb-2">Кто мы такие и куда доставляем</h2>
-        <p class="text-gray-500 max-w-xl mx-auto">Надёжный партнёр для международной доставки грузов с 2015 года</p>
+        <p class="text-gray-500 max-w-xl mx-auto">Надёжный партнёр для международной доставки грузов с 2024 года</p>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -587,7 +587,7 @@ export default {
         { value: '10,000+', label: 'Довольных клиентов' },
         { value: '50,000+', label: 'Доставленных посылок' },
         { value: '99.5%', label: 'Своевременная доставка' },
-        { value: '9 лет', label: 'Опыта работы' }
+        { value: '2 года', label: 'Опыта работы' }
       ]
     },
     stepsDetailed() {

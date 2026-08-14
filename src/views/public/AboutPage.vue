@@ -2,7 +2,7 @@
   <div class="max-w-4xl mx-auto px-4 py-12">
     <div class="text-center mb-12">
       <h1 class="text-3xl font-bold text-gray-900 mb-3">О компании Cargo Express 66</h1>
-      <p class="text-gray-500 text-lg max-w-2xl mx-auto">Надёжный партнёр для международной доставки с 2015 года</p>
+      <p class="text-gray-500 text-lg max-w-2xl mx-auto">Надёжный партнёр для международной доставки с 2024 года</p>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
@@ -58,7 +58,7 @@
           <p class="text-gray-500 text-sm mt-1">Надёжность</p>
         </div>
         <div>
-          <p class="text-3xl font-bold text-primary">9 лет</p>
+          <p class="text-3xl font-bold text-primary">2 года</p>
           <p class="text-gray-500 text-sm mt-1">Опыта</p>
         </div>
       </div>
