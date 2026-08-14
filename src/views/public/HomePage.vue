@@ -89,56 +89,84 @@
           </div>
         </div>
 
-        <div class="card p-8 border border-gray-100 shadow-sm rounded-3xl">
-          <div class="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center mb-4 text-2xl">
-            🌍
+        <div class="card p-8 border border-gray-100 shadow-sm rounded-3xl flex flex-col justify-between">
+          <div>
+            <div class="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center mb-4 text-2xl">
+              🛡️
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-4">Надежность и гарантии</h3>
+            <p class="text-gray-600 leading-relaxed mb-6">
+              Мы гарантируем 100% сохранность ваших посылок. Каждое отправление отслеживается на всех этапах пути: от прибытия на наш склад в США или Европе до момента выдачи в Таджикистане. Все грузы застрахованы, а наша служба поддержки всегда готова ответить на любые вопросы.
+            </p>
           </div>
-          <h3 class="text-2xl font-bold text-gray-900 mb-4">Наши направления</h3>
-          <p class="text-gray-600 mb-6">Мы летаем еженедельно из крупнейших сортировочных хабов США и Европы напрямую в Душанбе и Худжанд:</p>
-          <div class="space-y-4">
-            <div class="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-2xl transition-all">
-              <div class="flex items-center gap-3">
-                <span class="text-3xl">🇺🇸</span>
-                <div>
-                  <p class="font-bold text-gray-900 text-base">США → Таджикистан</p>
-                  <p class="text-xs text-gray-500">Доставка самолетом из Нью-Йорка, Делавэра и Филадельфии</p>
-                </div>
+          <div class="border-t border-gray-100 pt-6">
+            <h4 class="font-bold text-gray-900 mb-2">Наши склады приема</h4>
+            <div class="grid grid-cols-2 gap-4 text-sm text-gray-600">
+              <div class="flex items-center gap-2">📍 Нью-Йорк, США</div>
+              <div class="flex items-center gap-2">📍 Делавэр, США</div>
+              <div class="flex items-center gap-2">📍 Мюнхен, Германия</div>
+              <div class="flex items-center gap-2">📍 Мадрид, Испания</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scrollable Destinations Pricing Widget -->
+      <div class="mt-12 bg-gray-50/50 border border-gray-100 rounded-3xl p-8 shadow-sm">
+        <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+          <div>
+            <h3 class="text-2xl font-bold text-gray-900">🌍 Тарифы по направлениям доставки</h3>
+            <p class="text-sm text-gray-500 mt-1">Цены за авиадоставку посылок в Таджикистан (Душанбе, Худжанд)</p>
+          </div>
+          <div class="flex gap-2">
+            <button @click="scrollDirections('left')" class="w-8 h-8 rounded-full border border-gray-200 hover:border-primary hover:text-primary flex items-center justify-center transition-all bg-white text-gray-500">
+              ←
+            </button>
+            <button @click="scrollDirections('right')" class="w-8 h-8 rounded-full border border-gray-200 hover:border-primary hover:text-primary flex items-center justify-center transition-all bg-white text-gray-500">
+              →
+            </button>
+          </div>
+        </div>
+
+        <!-- Scrollable container -->
+        <div ref="directionsScroll" class="flex gap-4 overflow-x-auto pb-4 px-2 -mx-2 scroll-smooth snap-x snap-mandatory scrollbar-none">
+          <div v-for="d in directionsPricing" :key="d.country"
+            class="w-[280px] sm:w-[320px] flex-shrink-0 snap-start bg-white rounded-2xl border border-gray-150 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow group relative">
+            
+            <!-- Top Section -->
+            <div class="p-5">
+              <div class="flex items-center justify-between">
+                <span class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                  <span>{{ d.flag }}</span> {{ d.country }}
+                </span>
+                <span v-if="d.note" :title="d.note"
+                  class="w-6 h-6 rounded-full bg-cyan-50 text-cyan-500 hover:bg-cyan-100 flex items-center justify-center text-xs font-serif font-bold cursor-help transition-all">
+                  i
+                </span>
               </div>
-              <span class="bg-blue-100 text-primary text-xs font-bold px-3 py-1 rounded-full">6-10 дней</span>
+              <div class="text-xs text-gray-400 mt-2 flex items-center gap-1.5 font-medium">
+                <span>⚖️</span> за 1 кг
+              </div>
             </div>
 
-            <div class="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-2xl transition-all">
+            <!-- Bottom Section (Dark Navy) -->
+            <div class="bg-[#1b2537] p-4 text-white flex items-center justify-between">
               <div class="flex items-center gap-3">
-                <span class="text-3xl">🇩🇪</span>
+                <div class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/80 group-hover:scale-105 transition-all">
+                  ✈
+                </div>
                 <div>
-                  <p class="font-bold text-gray-900 text-base">Германия (Европа) → Таджикистан</p>
-                  <p class="text-xs text-gray-500">Доставка через наш хаб в Мюнхене</p>
+                  <p class="text-[9px] text-gray-400 uppercase tracking-widest font-black leading-tight">Авиа</p>
+                  <p class="text-xs font-bold text-white flex items-center gap-1 mt-0.5">
+                    ⏱ ≈{{ d.time }}
+                  </p>
                 </div>
               </div>
-              <span class="bg-blue-100 text-primary text-xs font-bold px-3 py-1 rounded-full">7-14 дней</span>
+              <div class="text-lg font-black tracking-tight text-white">
+                {{ d.price }}
+              </div>
             </div>
 
-            <div class="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-2xl transition-all">
-              <div class="flex items-center gap-3">
-                <span class="text-3xl">🇪🇸</span>
-                <div>
-                  <p class="font-bold text-gray-900 text-base">Испания (Европа) → Таджикистан</p>
-                  <p class="text-xs text-gray-500">Экспресс-доставка из Испании транзитом через Европу</p>
-                </div>
-              </div>
-              <span class="bg-blue-100 text-primary text-xs font-bold px-3 py-1 rounded-full">7-14 дней</span>
-            </div>
-
-            <div class="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-2xl transition-all">
-              <div class="flex items-center gap-3">
-                <span class="text-3xl">🇮🇹</span>
-                <div>
-                  <p class="font-bold text-gray-900 text-base">Италия (Европа) → Таджикистан</p>
-                  <p class="text-xs text-gray-500">Сборные грузы из Италии напрямую в Таджикистан</p>
-                </div>
-              </div>
-              <span class="bg-blue-100 text-primary text-xs font-bold px-3 py-1 rounded-full">7-14 дней</span>
-            </div>
           </div>
         </div>
       </div>
@@ -542,6 +570,13 @@ export default {
         { q: 'Как отследить посылку?', a: 'Вы можете ввести трек-номер на странице отслеживания или отслеживать все свои посылки в личном кабинете после регистрации.' },
         { q: 'Что нельзя отправлять?', a: 'Запрещены оружие, боеприпасы, лекарства без рецепта, опасные жидкости, литиевые аккумуляторы отдельно от приборов, алкоголь и табачные изделия. Полный список смотрите на странице Условий.' },
         { q: 'Есть ли страхование?', a: 'Да, вы можете застраховать вашу посылку. Стоимость страховки составляет 2% от объявленной ценности товара. Это гарантирует возмещение в случае утери груза.' }
+      ],
+      directionsPricing: [
+        { country: 'США', flag: '🇺🇸', time: '4-9 раб. дней', price: '$16', note: 'Прямые рейсы из Нью-Йорка и Филадельфии еженедельно. Обычный груз до 100 кг. От 100 кг – $15, от 1000 кг – $11.' },
+        { country: 'Англия', flag: '🇬🇧', time: '5-10 раб. дней', price: '$12', note: 'Доставка посылок и сборных грузов из Великобритании.' },
+        { country: 'Германия', flag: '🇩🇪', time: '2-6 раб. дней', price: '$12', note: 'Сборные грузы со всей Европы через склад в Мюнхене.' },
+        { country: 'Испания', flag: '🇪🇸', time: '7-14 раб. дней', price: '$12', note: 'Доставка посылок и товаров из Испании транзитом через Европу.' },
+        { country: 'Италия', flag: '🇮🇹', time: '7-14 раб. дней', price: '$12', note: 'Прямые поставки брендовой одежды и обуви из Италии.' }
       ]
     }
   },
@@ -567,6 +602,16 @@ export default {
   },
 
   methods: {
+    scrollDirections(dir) {
+      const container = this.$refs.directionsScroll;
+      if (!container) return;
+      const scrollAmount = 300;
+      if (dir === 'left') {
+        container.scrollLeft -= scrollAmount;
+      } else {
+        container.scrollLeft += scrollAmount;
+      }
+    },
     goToTracking() {
       if (this.trackingInput.trim()) {
         this.$router.push({ name: 'tracking', query: { q: this.trackingInput.trim() } })
