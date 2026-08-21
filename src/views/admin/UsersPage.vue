@@ -52,7 +52,7 @@
             <td colspan="8" class="text-center py-8 text-gray-400">Пользователи не найдены</td>
           </tr>
           <tr v-else v-for="user in filtered" :key="user.id">
-            <td class="font-mono text-xs text-gray-600">{{ user.customer_code || `CX66-${String(user.id).padStart(6,'0')}` }}</td>
+            <td class="font-mono text-xs text-gray-600">{{ user.customer_code || 'CX-AAAAAA' }}</td>
             <td>
               <div>
                 <p class="font-medium text-gray-900">{{ user.last_name }} {{ user.first_name }}</p>

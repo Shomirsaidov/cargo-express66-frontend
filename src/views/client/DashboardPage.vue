@@ -116,7 +116,7 @@ export default {
       return this.authStore.user?.first_name || 'Клиент'
     },
     customerCode() {
-      return this.authStore.user?.customer_code || this.authStore.user?.id || 'CX66-000000'
+      return this.authStore.user?.customer_code || 'CX-AAAAAA'
     },
     stats() {
       const parcels = this.parcelsStore.parcels

@@ -129,7 +129,7 @@ export default {
   computed: {
     authStore() { return useAuthStore() },
     customerCode() {
-      return this.authStore.user?.customer_code || `CX66-${String(this.authStore.user?.id || 0).padStart(6, '0')}`
+      return this.authStore.user?.customer_code || 'CX-AAAAAA'
     },
     registrationDate() {
       const d = this.authStore.user?.created_at
