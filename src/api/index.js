@@ -108,6 +108,7 @@ export const warehousesAPI = {
 // Tariffs endpoints
 export const tariffsAPI = {
   getAll: () => api.get('/tariffs'),
+  getPublic: () => api.get('/tariffs/public'),
   create: (data) => api.post('/tariffs', data),
   update: (id, data) => api.put(`/tariffs/${id}`, data),
   delete: (id) => api.delete(`/tariffs/${id}`)

@@ -16,10 +16,9 @@
             <label class="form-label">{{ $t('calculator.country') }}</label>
             <select v-model="form.country" class="input-field" required>
               <option value="">{{ $t('calculator.selectCountry') }}</option>
-              <option value="usa">{{ $t('calculator.usa') }}</option>
-              <option value="germany">{{ $t('calculator.germany') }}</option>
-              <option value="spain">{{ $t('calculator.spain') }}</option>
-              <option value="italy">{{ $t('calculator.italy') }}</option>
+              <option v-for="t in tariffsList" :key="t.id" :value="t.country.toLowerCase()">
+                {{ getCountryLabel(t.country) }}
+              </option>
             </select>
           </div>
 
@@ -37,15 +36,15 @@
             <label class="form-label">Выберите устройство</label>
             <select v-model="form.tech_type" class="input-field" required>
               <option value="">-- Выберите устройство --</option>
-              <option value="macbook">MacBook (меньше 3кг) — $100</option>
-              <option value="laptop">Ноутбук (меньше 3кг) — $100</option>
-              <option value="iphone">iPhone — $100</option>
-              <option value="watch">Apple Watch / Smart Watch — $30</option>
-              <option value="ipad">iPad — $70</option>
-              <option value="airpods">AirPods — $20</option>
-              <option value="meta_glasses">Meta Очки — $20</option>
-              <option value="airpods_max">AirPods Max — $25</option>
-              <option value="ebook">E-book — $15</option>
+              <option value="macbook">MacBook (меньше 3кг) — ${{ getTechRate('macbook') }}</option>
+              <option value="laptop">Ноутбук (меньше 3кг) — ${{ getTechRate('laptop') }}</option>
+              <option value="iphone">iPhone — ${{ getTechRate('iphone') }}</option>
+              <option value="watch">Apple Watch / Smart Watch — ${{ getTechRate('watch') }}</option>
+              <option value="ipad">iPad — ${{ getTechRate('ipad') }}</option>
+              <option value="airpods">AirPods — ${{ getTechRate('airpods') }}</option>
+              <option value="meta_glasses">Meta Очки — ${{ getTechRate('meta_glasses') }}</option>
+              <option value="airpods_max">AirPods Max — ${{ getTechRate('airpods_max') }}</option>
+              <option value="ebook">E-book — ${{ getTechRate('ebook') }}</option>
               <option value="ps5_xbox">PlayStation 5 / Xbox Series X — по весу</option>
             </select>
           </div>
@@ -166,14 +165,14 @@
 
         <!-- Tariff info summary -->
         <div class="mt-4 card">
-          <h3 class="font-semibold text-gray-800 mb-3">Сетка тарифов (по весу)</h3>
+          <h3 class="font-semibold text-gray-800 mb-3">Сетка тарифов (по весу) — {{ selectedTariff ? getCountryLabel(selectedTariff.country) : 'США' }}</h3>
           <div class="space-y-2">
             <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
               <div>
                 <p class="font-medium text-xs text-gray-800">До 100 кг</p>
               </div>
               <div class="text-right">
-                <p class="font-semibold text-primary text-xs">$16/кг</p>
+                <p class="font-semibold text-primary text-xs">${{ activeBasePrice }}/кг</p>
               </div>
             </div>
             <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -181,7 +180,7 @@
                 <p class="font-medium text-xs text-gray-800">От 100 кг</p>
               </div>
               <div class="text-right">
-                <p class="font-semibold text-primary text-xs">$15/кг</p>
+                <p class="font-semibold text-primary text-xs">${{ Math.max(1, activeBasePrice - 1) }}/кг</p>
               </div>
             </div>
             <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -189,7 +188,15 @@
                 <p class="font-medium text-xs text-gray-800">От 1000 кг</p>
               </div>
               <div class="text-right">
-                <p class="font-semibold text-primary text-xs">$11/кг</p>
+                <p class="font-semibold text-primary text-xs">${{ Math.max(1, activeBasePrice - 5) }}/кг</p>
+              </div>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-amber-50/50 rounded-lg border border-amber-100/50 mt-1">
+              <div>
+                <p class="font-medium text-xs text-amber-800">Минимальный заказ</p>
+              </div>
+              <div class="text-right">
+                <p class="font-semibold text-amber-800 text-xs">${{ selectedTariff ? selectedTariff.minimum_charge : 10 }}</p>
               </div>
             </div>
           </div>
@@ -200,13 +207,14 @@
 </template>
 
 <script>
-import { calculatorAPI, servicesAPI } from '@/api/index.js'
+import { calculatorAPI, servicesAPI, tariffsAPI } from '@/api/index.js'
 
 export default {
   name: 'CalculatorPage',
 
   data() {
     return {
+      tariffsList: [],
       form: {
         country: '',
         cargo_type: 'regular',
@@ -227,9 +235,50 @@ export default {
     }
   },
 
+  computed: {
+    selectedTariff() {
+      return this.tariffsList.find(t => t.country.toLowerCase() === this.form.country.toLowerCase())
+    },
+    activeBasePrice() {
+      if (this.selectedTariff) {
+        return parseFloat(this.selectedTariff.price_per_kg)
+      }
+      // Fallback
+      return 16
+    }
+  },
+
   methods: {
     isServiceSelected(id) {
       return this.form.services.includes(id)
+    },
+
+    getCountryLabel(country) {
+      const c = country.toLowerCase()
+      if (c.includes('usa') || c.includes('сша')) return this.$t('calculator.usa')
+      if (c.includes('germany') || c.includes('германи')) return this.$t('calculator.germany')
+      if (c.includes('spain') || c.includes('испани')) return this.$t('calculator.spain')
+      if (c.includes('italy') || c.includes('итали')) return this.$t('calculator.italy')
+      if (c.includes('uk') || c.includes('англия') || c.includes('великобрита')) return this.$t('calculator.uk') || 'Великобритания'
+      return country
+    },
+
+    getTechRate(type) {
+      const defaults = {
+        macbook: 100,
+        laptop: 100,
+        iphone: 100,
+        watch: 30,
+        ipad: 70,
+        airpods: 20,
+        meta_glasses: 20,
+        airpods_max: 25,
+        ebook: 15
+      }
+      if (this.selectedTariff && this.selectedTariff.tech_rates && typeof this.selectedTariff.tech_rates === 'object') {
+        return this.selectedTariff.tech_rates[type] !== undefined ? this.selectedTariff.tech_rates[type] : defaults[type]
+      }
+      return defaults[type]
     },
 
     async calculate() {
@@ -282,19 +331,29 @@ export default {
         ebook: 15
       }
 
+      if (this.selectedTariff && this.selectedTariff.tech_rates && typeof this.selectedTariff.tech_rates === 'object') {
+        Object.assign(techRates, this.selectedTariff.tech_rates)
+      }
+
       const isTechItem = this.form.cargo_type === 'tech' && this.form.tech_type !== 'ps5_xbox'
       if (isTechItem && techRates[this.form.tech_type]) {
         baseCost = techRates[this.form.tech_type]
       } else {
-        // Enforce weight calculation logic locally
+        // Enforce weight calculation logic locally using dynamic rates
+        const basePrice = this.activeBasePrice
+        const minimumCharge = this.selectedTariff ? parseFloat(this.selectedTariff.minimum_charge) : 10
         const calculatedWeight = weightVal < 1.0 ? 1.0 : weightVal
-        let rate = 16
+        
+        let rate = basePrice
         if (calculatedWeight >= 1000) {
-          rate = 11
+          rate = Math.max(1, basePrice - 5)
         } else if (calculatedWeight >= 100) {
-          rate = 15
+          rate = Math.max(1, basePrice - 1)
         }
         baseCost = calculatedWeight * rate
+        if (baseCost < minimumCharge) {
+          baseCost = minimumCharge
+        }
       }
 
       // Calculate insurance
@@ -311,12 +370,20 @@ export default {
         insurance_cost: insuranceCost,
         services_cost: servicesCost,
         total: baseCost + insuranceCost + servicesCost,
-        delivery_time: (this.form.country === 'germany' || this.form.country === 'spain' || this.form.country === 'italy') ? '7-14 дней' : '6-10 дней'
+        delivery_time: this.selectedTariff?.delivery_time || ((this.form.country === 'germany' || this.form.country === 'spain' || this.form.country === 'italy') ? '7-14 дней' : '6-10 дней')
       }
     }
   },
 
-  mounted() {
+  async mounted() {
+    // Load active tariffs from API
+    try {
+      const r = await tariffsAPI.getPublic()
+      this.tariffsList = r.data?.data || r.data || []
+    } catch (e) {
+      console.error('Failed to load tariffs:', e)
+    }
+
     // Load services from API if available
     servicesAPI.getAll().then(r => {
       const fetched = r.data?.data || r.data || []

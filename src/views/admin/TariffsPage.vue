@@ -58,7 +58,7 @@
     <Teleport to="body">
       <transition name="fade">
         <div v-if="showModal" class="modal-overlay" @click.self="showModal = false">
-          <div class="modal-content max-w-sm">
+          <div class="modal-content max-w-md">
             <div class="p-6">
               <h3 class="text-lg font-bold mb-4">{{ isEdit ? 'Редактировать тариф' : 'Создать тариф' }}</h3>
 
@@ -82,6 +82,49 @@
                 <div>
                   <label class="form-label">Срок доставки (дней):</label>
                   <input v-model="form.delivery_time" type="text" required class="input-field" placeholder="6-10 дней" />
+                </div>
+
+                <!-- Technology product rates section -->
+                <div class="border-t border-gray-100 pt-4">
+                  <h4 class="text-sm font-semibold text-gray-800 mb-2">Тарифы на технику ($)</h4>
+                  <div class="grid grid-cols-3 gap-2 text-xs">
+                    <div>
+                      <label class="form-label">MacBook</label>
+                      <input v-model.number="form.tech_rates.macbook" type="number" step="1" required class="input-field py-1" />
+                    </div>
+                    <div>
+                      <label class="form-label">Ноутбук</label>
+                      <input v-model.number="form.tech_rates.laptop" type="number" step="1" required class="input-field py-1" />
+                    </div>
+                    <div>
+                      <label class="form-label">iPhone</label>
+                      <input v-model.number="form.tech_rates.iphone" type="number" step="1" required class="input-field py-1" />
+                    </div>
+                    <div>
+                      <label class="form-label">Smart Watch</label>
+                      <input v-model.number="form.tech_rates.watch" type="number" step="1" required class="input-field py-1" />
+                    </div>
+                    <div>
+                      <label class="form-label">iPad</label>
+                      <input v-model.number="form.tech_rates.ipad" type="number" step="1" required class="input-field py-1" />
+                    </div>
+                    <div>
+                      <label class="form-label">AirPods</label>
+                      <input v-model.number="form.tech_rates.airpods" type="number" step="1" required class="input-field py-1" />
+                    </div>
+                    <div>
+                      <label class="form-label">Meta Glasses</label>
+                      <input v-model.number="form.tech_rates.meta_glasses" type="number" step="1" required class="input-field py-1" />
+                    </div>
+                    <div>
+                      <label class="form-label">AirPods Max</label>
+                      <input v-model.number="form.tech_rates.airpods_max" type="number" step="1" required class="input-field py-1" />
+                    </div>
+                    <div>
+                      <label class="form-label">E-book</label>
+                      <input v-model.number="form.tech_rates.ebook" type="number" step="1" required class="input-field py-1" />
+                    </div>
+                  </div>
                 </div>
 
                 <div class="flex items-center gap-2">
@@ -126,7 +169,18 @@ export default {
         price_per_kg: '',
         minimum_charge: '',
         delivery_time: '',
-        is_active: true
+        is_active: true,
+        tech_rates: {
+          macbook: 100,
+          laptop: 100,
+          iphone: 100,
+          watch: 30,
+          ipad: 70,
+          airpods: 20,
+          meta_glasses: 20,
+          airpods_max: 25,
+          ebook: 15
+        }
       }
     }
   },
@@ -152,7 +206,18 @@ export default {
         price_per_kg: '',
         minimum_charge: '',
         delivery_time: '',
-        is_active: true
+        is_active: true,
+        tech_rates: {
+          macbook: 100,
+          laptop: 100,
+          iphone: 100,
+          watch: 30,
+          ipad: 70,
+          airpods: 20,
+          meta_glasses: 20,
+          airpods_max: 25,
+          ebook: 15
+        }
       }
       this.showModal = true
     },
@@ -160,12 +225,24 @@ export default {
     openEditModal(t) {
       this.isEdit = true
       this.editingId = t.id
+      const defaultRates = {
+        macbook: 100,
+        laptop: 100,
+        iphone: 100,
+        watch: 30,
+        ipad: 70,
+        airpods: 20,
+        meta_glasses: 20,
+        airpods_max: 25,
+        ebook: 15
+      }
       this.form = {
         country: t.country,
         price_per_kg: t.price_per_kg,
         minimum_charge: t.minimum_charge,
         delivery_time: t.delivery_time,
-        is_active: t.is_active !== false
+        is_active: t.is_active !== false,
+        tech_rates: t.tech_rates && typeof t.tech_rates === 'object' ? { ...defaultRates, ...t.tech_rates } : defaultRates
       }
       this.showModal = true
     },
@@ -178,7 +255,8 @@ export default {
           price_per_kg: parseFloat(this.form.price_per_kg),
           minimum_charge: parseFloat(this.form.minimum_charge),
           delivery_time: this.form.delivery_time,
-          is_active: this.form.is_active
+          is_active: this.form.is_active,
+          tech_rates: this.form.tech_rates
         }
 
         if (this.isEdit) {

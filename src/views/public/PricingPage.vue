@@ -30,19 +30,19 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div class="bg-white bg-opacity-10 backdrop-blur-md rounded-2xl p-6 border border-white border-opacity-10 hover:bg-opacity-15 transition-all">
             <p class="text-xs text-blue-200 uppercase font-semibold tracking-wider">До 100 кг</p>
-            <p class="text-4xl font-black mt-2 mb-1">$16 <span class="text-lg font-normal">/ кг</span></p>
+            <p class="text-4xl font-black mt-2 mb-1">${{ activeBaseRate }} <span class="text-lg font-normal">/ кг</span></p>
             <p class="text-xs text-blue-100">Для небольших и средних посылок</p>
           </div>
           
           <div class="bg-white bg-opacity-10 backdrop-blur-md rounded-2xl p-6 border border-white border-opacity-10 hover:bg-opacity-15 transition-all">
             <p class="text-xs text-blue-200 uppercase font-semibold tracking-wider">От 100 кг</p>
-            <p class="text-4xl font-black mt-2 mb-1">$15 <span class="text-lg font-normal">/ кг</span></p>
+            <p class="text-4xl font-black mt-2 mb-1">${{ Math.max(1, activeBaseRate - 1) }} <span class="text-lg font-normal">/ кг</span></p>
             <p class="text-xs text-blue-100">Выгодный тариф для оптовых партий</p>
           </div>
           
           <div class="bg-white bg-opacity-10 backdrop-blur-md rounded-2xl p-6 border border-white border-opacity-10 hover:bg-opacity-15 transition-all">
             <p class="text-xs text-blue-200 uppercase font-semibold tracking-wider">От 1000 кг</p>
-            <p class="text-4xl font-black mt-2 mb-1">$11 <span class="text-lg font-normal">/ кг</span></p>
+            <p class="text-4xl font-black mt-2 mb-1">${{ Math.max(1, activeBaseRate - 5) }} <span class="text-lg font-normal">/ кг</span></p>
             <p class="text-xs text-blue-100">Крупногабаритные карго-поставки</p>
           </div>
         </div>
@@ -172,7 +172,7 @@
             <div>
               <h3 class="font-bold text-lg text-gray-900 mb-2">Правила округления веса</h3>
               <p class="text-sm text-gray-600 leading-relaxed mb-2">
-                • Вес <strong>до 1 кг</strong> округляется в большую сторону до 1 кг. Например, если товар весит 0.4 кг, стоимость рассчитывается как за 1 кг ($16).
+                • Вес <strong>до 1 кг</strong> округляется в большую сторону до 1 кг. Например, если товар весит 0.4 кг, стоимость рассчитывается как за 1 кг (${{ activeBaseRate }}).
               </p>
               <p class="text-sm text-gray-600 leading-relaxed">
                 • Если товар весит <strong>1.0 кг и более</strong> (например, 1.2 кг или 2.8 кг), расчет ведется строго по фактическому весу без округлений.
@@ -242,41 +242,107 @@
 </template>
 
 <script>
+import { tariffsAPI } from '@/api/index.js'
+
 export default {
   name: 'PricingPage',
   data() {
     return {
-      techTariffs: [
-        { icon: '💻', name: 'MacBook', sub: 'меньше 3кг', price: '$100' },
-        { icon: '💻', name: 'Ноутбук', sub: 'меньше 3кг', price: '$100' },
-        { icon: '📱', name: 'iPhone', price: '$100' },
-        { icon: '⌚', name: 'Apple / Smart Watch', price: '$30' },
-        { icon: '📟', name: 'iPad', price: '$70' },
-        { icon: '🎧', name: 'AirPods', price: '$20' },
-        { icon: '🕶️', name: 'Meta Очки', price: '$20' },
-        { icon: '🎧', name: 'AirPods Max', price: '$25' },
-        { icon: '📖', name: 'E-book', price: '$15' },
+      tariffsList: []
+    }
+  },
+  computed: {
+    directionsPricing() {
+      if (this.tariffsList.length === 0) {
+        // Local fallbacks if backend is empty/loading
+        return [
+          { country: 'США', flag: '🇺🇸', time: '4-9 раб. дней', price: '$16', note: 'Прямые рейсы из Нью-Йорка и Филадельфии еженедельно. Обычный груз до 100 кг. От 100 кг – $15, от 1000 кг – $11.' },
+          { country: 'Германия', flag: '🇩🇪', time: '2-6 раб. дней', price: '$12', note: 'Сборные грузы со всей Европы через склад в Мюнхене.' },
+          { country: 'Испания', flag: '🇪🇸', time: '7-14 раб. дней', price: '$12', note: 'Доставка посылок и товаров из Испании транзитом через Европу.' },
+          { country: 'Италия', flag: '🇮🇹', time: '7-14 раб. дней', price: '$12', note: 'Прямые поставки брендовой одежды и обуви из Италии.' }
+        ]
+      }
+
+      return this.tariffsList.map(t => {
+        const flag = this.countryFlag(t.country)
+        const basePrice = parseFloat(t.price_per_kg)
+        const discount100 = Math.max(1, basePrice - 1)
+        const discount1000 = Math.max(1, basePrice - 5)
+        return {
+          country: t.country,
+          flag,
+          time: t.delivery_time || '5-10 раб. дней',
+          price: `$${basePrice}`,
+          note: `Прямые авиарейсы еженедельно. Обычный груз до 100 кг. От 100 кг – $${discount100}, от 1000 кг – $${discount1000}. Минимальная стоимость – $${t.minimum_charge || 0}.`
+        }
+      })
+    },
+
+    techRates() {
+      // Find USA tariff or first active tariff that has tech_rates
+      const usa = this.tariffsList.find(t => t.country.toLowerCase().includes('usa') || t.country.toLowerCase().includes('сша'))
+      const fallback = this.tariffsList[0]
+      const selected = usa || fallback
+
+      const defaults = {
+        macbook: 100,
+        laptop: 100,
+        iphone: 100,
+        watch: 30,
+        ipad: 70,
+        airpods: 20,
+        meta_glasses: 20,
+        airpods_max: 25,
+        ebook: 15
+      }
+
+      if (selected && selected.tech_rates && typeof selected.tech_rates === 'object') {
+        return { ...defaults, ...selected.tech_rates }
+      }
+      return defaults
+    },
+
+    techTariffs() {
+      const tr = this.techRates
+      return [
+        { icon: '💻', name: 'MacBook', sub: 'меньше 3кг', price: `$${tr.macbook}` },
+        { icon: '💻', name: 'Ноутбук', sub: 'меньше 3кг', price: `$${tr.laptop}` },
+        { icon: '📱', name: 'iPhone', price: `$${tr.iphone}` },
+        { icon: '⌚', name: 'Apple / Smart Watch', price: `$${tr.watch}` },
+        { icon: '📟', name: 'iPad', price: `$${tr.ipad}` },
+        { icon: '🎧', name: 'AirPods', price: `$${tr.airpods}` },
+        { icon: '🕶️', name: 'Meta Очки', price: `$${tr.meta_glasses}` },
+        { icon: '🎧', name: 'AirPods Max', price: `$${tr.airpods_max}` },
+        { icon: '📖', name: 'E-book', price: `$${tr.ebook}` },
         { icon: '🎮', name: 'PlayStation 5 / Xbox', sub: 'по согласованию', price: 'по весу' }
-      ],
-      directionsPricing: [
-        { country: 'США', flag: '🇺🇸', time: '4-9 раб. дней', price: '$16', note: 'Прямые рейсы из Нью-Йорка и Филадельфии еженедельно. Обычный груз до 100 кг. От 100 кг – $15, от 1000 кг – $11.' },
-        { country: 'Англия', flag: '🇬🇧', time: '5-10 раб. дней', price: '$12', note: 'Доставка посылок и сборных грузов из Великобритании.' },
-        { country: 'Германия', flag: '🇩🇪', time: '2-6 раб. дней', price: '$12', note: 'Сборные грузы со всей Европы через склад в Мюнхене.' },
-        { country: 'Испания', flag: '🇪🇸', time: '7-14 раб. дней', price: '$12', note: 'Доставка посылок и товаров из Испании транзитом через Европу.' },
-        { country: 'Италия', flag: '🇮🇹', time: '7-14 раб. дней', price: '$12', note: 'Прямые поставки брендовой одежды и обуви из Италии.' }
       ]
+    },
+
+    activeBaseRate() {
+      const usa = this.tariffsList.find(t => t.country.toLowerCase().includes('usa') || t.country.toLowerCase().includes('сша'))
+      const fallback = this.tariffsList[0]
+      const selected = usa || fallback
+      return selected ? parseFloat(selected.price_per_kg) : 16
     }
   },
   methods: {
-    scrollDirections(dir) {
-      const container = this.$refs.directionsScroll;
-      if (!container) return;
-      const scrollAmount = 300;
-      if (dir === 'left') {
-        container.scrollLeft -= scrollAmount;
-      } else {
-        container.scrollLeft += scrollAmount;
-      }
+    countryFlag(country) {
+      const c = country.toLowerCase()
+      if (c.includes('usa') || c.includes('сша')) return '🇺🇸'
+      if (c.includes('germany') || c.includes('германи')) return '🇩🇪'
+      if (c.includes('uk') || c.includes('англия') || c.includes('великобрита')) return '🇬🇧'
+      if (c.includes('spain') || c.includes('испани')) return '🇪🇸'
+      if (c.includes('italy') || c.includes('итали')) return '🇮🇹'
+      if (c.includes('kazakhstan') || c.includes('казахстан')) return '🇰🇿'
+      return '🌍'
+    }
+  },
+  async mounted() {
+    try {
+      const r = await tariffsAPI.getPublic()
+      this.tariffsList = r.data?.data || r.data || []
+    } catch (e) {
+      console.error('Failed to load tariffs:', e)
     }
   }
 }
