@@ -103,29 +103,52 @@ export default {
     }
   },
 
+  computed: {
+    authStore() {
+      return useAuthStore()
+    },
+    isLoggedIn() {
+      return this.authStore.isLoggedIn
+    }
+  },
+
+  watch: {
+    isLoggedIn: {
+      immediate: true,
+      handler(val) {
+        if (val) {
+          this.redirectUser()
+        }
+      }
+    }
+  },
+
   methods: {
+    redirectUser() {
+      const redirectTo = this.$route.query.redirect
+      const role = this.authStore.user?.role
+      if (redirectTo) {
+        this.$router.push(redirectTo)
+      } else if (role === 'admin') {
+        this.$router.push('/admin/dashboard')
+      } else if (role === 'warehouse_employee') {
+        this.$router.push('/warehouse/scanner')
+      } else {
+        this.$router.push('/dashboard')
+      }
+    },
+
     async handleLogin() {
       this.error = null
       this.loading = true
       try {
-        const authStore = useAuthStore()
-        const result = await authStore.login({
+        const result = await this.authStore.login({
           email: this.form.email,
           password: this.form.password
         })
 
         if (result.success) {
-          const redirectTo = this.$route.query.redirect
-          const role = result.user?.role
-          if (redirectTo) {
-            this.$router.push(redirectTo)
-          } else if (role === 'admin') {
-            this.$router.push('/admin/dashboard')
-          } else if (role === 'warehouse_employee') {
-            this.$router.push('/warehouse/scanner')
-          } else {
-            this.$router.push('/dashboard')
-          }
+          this.redirectUser()
         } else {
           this.error = result.error || this.$t('auth.loginError')
         }
