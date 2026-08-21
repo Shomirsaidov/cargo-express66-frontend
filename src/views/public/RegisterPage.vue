@@ -174,6 +174,12 @@ export default {
   },
 
   computed: {
+    authStore() {
+      return useAuthStore()
+    },
+    isLoggedIn() {
+      return this.authStore.isLoggedIn
+    },
     passwordStrength() {
       const pwd = this.form.password
       if (!pwd) return 0
@@ -190,7 +196,32 @@ export default {
     }
   },
 
+  watch: {
+    isLoggedIn: {
+      immediate: true,
+      handler(val) {
+        if (val) {
+          this.redirectUser()
+        }
+      }
+    }
+  },
+
   methods: {
+    redirectUser() {
+      const redirectTo = this.$route.query.redirect
+      const role = this.authStore.user?.role
+      if (redirectTo) {
+        this.$router.push(redirectTo)
+      } else if (role === 'admin') {
+        this.$router.push('/admin/dashboard')
+      } else if (role === 'warehouse_employee') {
+        this.$router.push('/warehouse/scanner')
+      } else {
+        this.$router.push('/dashboard')
+      }
+    },
+
     async handleRegister() {
       this.error = null
       this.successMsg = null
@@ -202,7 +233,6 @@ export default {
 
       this.loading = true
       try {
-        const authStore = useAuthStore()
         const payload = {
           first_name: this.form.first_name,
           last_name: this.form.last_name,
@@ -213,9 +243,9 @@ export default {
           delivery_address: this.form.delivery_address
         }
 
-        const result = await authStore.register(payload)
+        const result = await this.authStore.register(payload)
         if (result.success) {
-          this.$router.push('/dashboard')
+          this.redirectUser()
         } else {
           this.error = result.error || this.$t('auth.registerError')
         }
