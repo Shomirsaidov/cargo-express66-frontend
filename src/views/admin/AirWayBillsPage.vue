@@ -38,11 +38,11 @@
               <td>
                 <span class="badge"
                   :class="{
-                    'bg-gray-100 text-gray-700': awb.status === 'scheduled',
-                    'bg-blue-100 text-blue-700': awb.status === 'departed',
-                    'bg-green-100 text-green-700': awb.status === 'arrived'
+                    'bg-gray-100 text-gray-700': awb.status === 'scheduled' || awb.status === 'pending' || awb.status === 'active',
+                    'bg-blue-100 text-blue-700': awb.status === 'departed' || awb.status === 'in_transit',
+                    'bg-green-100 text-green-700': awb.status === 'arrived' || awb.status === 'completed'
                   }">
-                  {{ awb.status }}
+                  {{ formatAwbStatus(awb.status) }}
                 </span>
               </td>
               <td>
@@ -70,8 +70,8 @@
           <label class="form-label">Статус рейса:</label>
           <div class="flex gap-2">
             <select v-model="statusForm.status" class="input-field py-1 text-xs">
-              <option value="scheduled">Запланирован</option>
-              <option value="departed">Вылетел</option>
+              <option value="pending">Запланирован</option>
+              <option value="in_transit">Вылетел</option>
               <option value="arrived">Прибыл в Душанбе</option>
             </select>
             <button @click="updateAwbStatus" class="btn btn-primary btn-sm" :disabled="updatingStatus">
@@ -234,7 +234,7 @@ export default {
       },
 
       statusForm: {
-        status: 'scheduled'
+        status: 'pending'
       }
     }
   },
@@ -250,6 +250,20 @@ export default {
     formatDate(d) {
       if (!d) return '—'
       return new Date(d).toLocaleDateString('ru-RU')
+    },
+
+    formatAwbStatus(status) {
+      const map = {
+        scheduled: 'Запланирован',
+        pending: 'Запланирован',
+        active: 'Активен',
+        departed: 'Вылетел',
+        in_transit: 'Вылетел',
+        arrived: 'Прибыл в Душанбе',
+        completed: 'Завершен',
+        cancelled: 'Отменен'
+      }
+      return map[status] || status
     },
 
     async loadAwbs() {
@@ -269,7 +283,7 @@ export default {
 
     async selectAwb(awb) {
       this.selectedAwb = awb
-      this.statusForm.status = awb.status
+      this.statusForm.status = awb.status === 'scheduled' ? 'pending' : (awb.status === 'departed' ? 'in_transit' : awb.status)
       this.loadAssignedParcels()
       this.loadUnassignedParcels()
     },

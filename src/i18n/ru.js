@@ -60,7 +60,7 @@ export default {
     country: 'Страна',
     createdAt: 'Дата создания',
     updatedAt: 'Последнее обновление',
-    arrivalDate: 'Дата прибытия',
+    arrivalDate: 'Ориентировочная дата прибытия',
     shipmentDate: 'Дата отправки',
     deliveryDate: 'Дата доставки',
     declaredValue: 'Объявленная стоимость',
