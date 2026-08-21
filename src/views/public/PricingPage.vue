@@ -125,13 +125,13 @@
             <div class="text-center sm:text-right">
               <span class="text-[9px] text-white/70 uppercase tracking-widest block font-bold">Сроки</span>
               <span class="text-xs sm:text-sm font-bold flex items-center justify-center sm:justify-end gap-1 mt-0.5 text-white">
-                ⏱ ≈5-10 раб. дней
+                ⏱ ≈{{ kazakhstanTariff ? kazakhstanTariff.delivery_time : '5-10 раб. дней' }}
               </span>
             </div>
             <div class="h-8 w-px bg-white/30"></div>
             <div class="text-center">
               <span class="text-[9px] text-white/70 uppercase tracking-widest block font-bold">Тариф за 1 кг</span>
-              <span class="text-xl sm:text-2xl font-black text-white">$12</span>
+              <span class="text-xl sm:text-2xl font-black text-white">${{ kazakhstanTariff ? kazakhstanTariff.price_per_kg : 12 }}</span>
             </div>
           </div>
         </div>
@@ -323,6 +323,9 @@ export default {
       const fallback = this.tariffsList[0]
       const selected = usa || fallback
       return selected ? parseFloat(selected.price_per_kg) : 16
+    },
+    kazakhstanTariff() {
+      return this.tariffsList.find(t => t.country.toLowerCase().includes('kazakhstan') || t.country.toLowerCase().includes('казахстан'))
     }
   },
   methods: {
