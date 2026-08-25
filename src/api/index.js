@@ -89,7 +89,13 @@ export const notificationsAPI = {
 
 // Admin users endpoints
 export const usersAPI = {
-  getAll: (params) => api.get('/customers', { params }),
+  getAll: (params = {}) => {
+    // If caller doesn't provide pagination, return a larger default page so admin UI sees all users
+    if (!('limit' in params) && !('page' in params)) {
+      params.limit = 1000
+    }
+    return api.get('/customers', { params })
+  },
   getOne: (id) => api.get(`/customers/${id}`),
   update: (id, data) => api.put(`/customers/${id}`, data),
   updateRole: (id, role) => api.put(`/customers/${id}`, { role }),

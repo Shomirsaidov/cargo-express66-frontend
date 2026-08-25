@@ -1,0 +1,13 @@
+- [x] Run database migration script and update Delaware warehouse address
+- [x] Create backend destination countries route `/api/destination-countries`
+- [x] Register route in `backend/src/routes/index.js`
+- [x] Update backend parcel, tracking controllers and parcel service to support `destination_country`
+- [x] Update `backend/src/services/reportService.js` to include the required columns
+- [x] Update frontend `frontend/src/api/index.js` with `destinationCountriesAPI`
+- [x] Update client `TrackingNumbersPage.vue` with dynamic destination country selector
+- [x] Update client `ShipmentsPage.vue` and `ShipmentDetailPage.vue` to show destination country
+- [x] Update admin `ShipmentsPage.vue` to show and select destination country
+- [x] Update admin `AdminSettingsPage.vue` with Destination Countries tab for CRUD
+- [x] Update Delaware warehouse address in frontend static layouts (Contacts, FAQ, Home)
+- [x] Update public `ServicesPage.vue` to display the two new fulfillment services
+- [x] Build and verify frontend compilation
