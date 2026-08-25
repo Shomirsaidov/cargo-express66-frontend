@@ -99,7 +99,8 @@ export const usersAPI = {
   getOne: (id) => api.get(`/customers/${id}`),
   update: (id, data) => api.put(`/customers/${id}`, data),
   updateRole: (id, role) => api.put(`/customers/${id}`, { role }),
-  toggleActive: (id, isActive) => api.put(`/customers/${id}`, { is_active: isActive })
+  toggleActive: (id, isActive) => api.put(`/customers/${id}`, { is_active: isActive }),
+  delete: (id) => api.delete(`/customers/${id}`)
 }
 
 // Warehouses endpoints
