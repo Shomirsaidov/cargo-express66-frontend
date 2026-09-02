@@ -152,7 +152,7 @@
             <div class="p-6">
               <h3 class="text-lg font-bold mb-4">{{ isEdit ? 'Редактировать отправление' : 'Создать отправление' }}</h3>
 
-              <form @submit.prevent @keydown.enter.prevent class="space-y-4">
+              <div @keydown.enter.prevent class="space-y-4">
                 <div class="grid grid-cols-2 gap-4">
                   <div>
                     <label class="form-label">Трек-номер:</label>
@@ -322,7 +322,7 @@
                     Сохранить
                   </button>
                 </div>
-              </form>
+              </div>
             </div>
           </div>
         </div>
