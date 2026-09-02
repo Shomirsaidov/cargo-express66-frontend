@@ -30,7 +30,7 @@
             type="text"
             :placeholder="$t('warehouse.scanPlaceholder')"
             class="input-field text-lg py-3 px-4 pl-12 font-mono"
-            @keyup.enter="handleScan"
+            @keydown.enter.prevent.stop="handleScan"
             :disabled="scanning"
           />
           <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -108,7 +108,7 @@
 
       <!-- Flow: Pre-registered or Unknown Recipient -->
       <div v-else>
-        <form @submit.prevent="saveParcel" class="space-y-4">
+        <form @submit.prevent="saveParcel" @keydown.enter.prevent class="space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Customer Section -->
             <div class="card p-4 bg-gray-50 border-0">
