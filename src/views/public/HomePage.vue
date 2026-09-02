@@ -548,8 +548,6 @@
 </template>
 
 <script>
-import { } from '@/api/index.js'
-
 export default {
   name: 'HomePage',
 
@@ -608,8 +606,6 @@ export default {
     toggleFaq(index) {
       this.faqOpenIndex = this.faqOpenIndex === index ? null : index
     }
-  },
-
-  mounted() {}
+  }
 }
 </script>
