@@ -152,12 +152,13 @@
             <div class="p-6">
               <h3 class="text-lg font-bold mb-4">{{ isEdit ? 'Редактировать отправление' : 'Создать отправление' }}</h3>
 
-              <form @submit.prevent="saveParcel" class="space-y-4">
+              <form @submit.prevent="saveParcel" @keydown.enter.prevent class="space-y-4">
                 <div class="grid grid-cols-2 gap-4">
                   <div>
                     <label class="form-label">Трек-номер:</label>
                     <input v-if="isNoTrack" type="text" disabled class="input-field bg-gray-50 text-gray-400 font-mono" value="RND (Автогенерация)" />
-                    <input v-else v-model="form.tracking_number" type="text" required class="input-field" :disabled="isEdit" @change="lookupTrackingNumber" />
+                    <input v-else v-model="form.tracking_number" type="text" required class="input-field" :disabled="isEdit"
+                      @keydown.enter.prevent.stop="lookupTrackingNumber" @change="lookupTrackingNumber" />
                   </div>
 
                   <div>

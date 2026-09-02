@@ -223,7 +223,7 @@
     </section>
 
     <!-- Interactive Calculator -->
-    <section v-if="false" id="calculator" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="calculator" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-12">
         <span class="bg-primary-50 text-primary border border-primary-200 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
           Калькулятор
@@ -241,10 +241,9 @@
                 <label class="form-label font-bold text-gray-800 mb-1.5">Страна отправления</label>
                 <select v-model="calcForm.country" class="input-field" required>
                   <option value="">-- Выберите страну --</option>
-                  <option value="usa">США (6-10 дней)</option>
-                  <option value="germany">Европа - Германия (7-14 дней)</option>
-                  <option value="spain">Европа - Испания (7-14 дней)</option>
-                  <option value="italy">Европа - Италия (7-14 дней)</option>
+                  <option v-for="tariff in tariffsList" :key="tariff.id" :value="tariff.country.toLowerCase()">
+                    {{ tariff.country }} ({{ tariff.delivery_time || 'срок уточняется' }})
+                  </option>
                 </select>
               </div>
 
@@ -262,16 +261,9 @@
               <label class="form-label font-bold text-gray-800 mb-1.5">Выберите устройство</label>
               <select v-model="calcForm.tech_type" class="input-field" required>
                 <option value="">-- Выберите тип электроники --</option>
-                <option value="macbook">MacBook (меньше 3кг) — $100</option>
-                <option value="laptop">Ноутбук (меньше 3кг) — $100</option>
-                <option value="iphone">iPhone — $100</option>
-                <option value="watch">Apple Watch / Smart Watch — $30</option>
-                <option value="ipad">iPad — $70</option>
-                <option value="airpods">AirPods — $20</option>
-                <option value="meta_glasses">Meta Очки — $20</option>
-                <option value="airpods_max">AirPods Max — $25</option>
-                <option value="ebook">E-book — $15</option>
-                <option value="ps5_xbox">PlayStation 5 / Xbox Series X — по весу</option>
+                <option v-for="tech in techTariffs" :key="tech.type" :value="tech.type">
+                  {{ tech.name }}{{ tech.sub ? ` (${tech.sub})` : '' }} — {{ tech.price }}
+                </option>
               </select>
             </div>
 
@@ -383,15 +375,15 @@
             <div class="space-y-2 text-xs">
               <div class="flex items-center justify-between p-2.5 bg-gray-50 rounded-xl">
                 <span class="font-semibold text-gray-800">До 100 кг</span>
-                <span class="font-bold text-primary">$16/кг</span>
+                <span class="font-bold text-primary">${{ selectedCalcTariff?.price_per_kg || '—' }}/кг</span>
               </div>
               <div class="flex items-center justify-between p-2.5 bg-gray-50 rounded-xl">
                 <span class="font-semibold text-gray-800">От 100 кг</span>
-                <span class="font-bold text-primary">$15/кг</span>
+                <span class="font-bold text-primary">${{ selectedCalcTariff ? Math.max(1, selectedCalcTariff.price_per_kg - 1) : '—' }}/кг</span>
               </div>
               <div class="flex items-center justify-between p-2.5 bg-gray-50 rounded-xl">
                 <span class="font-semibold text-gray-800">От 1000 кг</span>
-                <span class="font-bold text-primary">$11/кг</span>
+                <span class="font-bold text-primary">${{ selectedCalcTariff ? Math.max(1, selectedCalcTariff.price_per_kg - 5) : '—' }}/кг</span>
               </div>
             </div>
           </div>
