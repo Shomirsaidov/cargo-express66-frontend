@@ -540,7 +540,7 @@
 </template>
 
 <script>
-import { tariffsAPI } from '@/api/index.js'
+import { calculatorAPI, servicesAPI, tariffsAPI } from '@/api/index.js'
 
 export default {
   name: 'HomePage',
@@ -549,6 +549,17 @@ export default {
     return {
       trackingInput: '',
       tariffsList: [],
+      calcLoading: false,
+      calcResult: null,
+      calcForm: {
+        country: '',
+        cargo_type: 'regular',
+        tech_type: '',
+        weight: '',
+        declared_value: 0,
+        services: []
+      },
+      availableServices: [],
       faqOpenIndex: null,
       faqs: [
         { q: 'Как узнать адрес склада в США?', a: 'Адреса наших складов приема в США указаны в личном кабинете. Для интернет-покупок используйте безналоговый склад в штате Делавэр: 1680 Porter Rd, Suite A-3, Bear, DE 19701, указав свой ID клиента.' },
@@ -561,6 +572,9 @@ export default {
   },
 
   computed: {
+    selectedCalcTariff() {
+      return this.tariffsList.find((tariff) => tariff.country.toLowerCase() === this.calcForm.country)
+    },
     directionsPricing() {
       return this.tariffsList.map((tariff) => {
         const basePrice = parseFloat(tariff.price_per_kg) || 0
@@ -593,16 +607,16 @@ export default {
         ? { ...defaults, ...tariff.tech_rates }
         : defaults
       return [
-        { icon: '💻', name: 'MacBook', sub: 'меньше 3кг', price: `$${rates.macbook}` },
-        { icon: '💻', name: 'Ноутбук', sub: 'меньше 3кг', price: `$${rates.laptop}` },
-        { icon: '📱', name: 'iPhone', price: `$${rates.iphone}` },
-        { icon: '⌚', name: 'Apple / Smart Watch', price: `$${rates.watch}` },
-        { icon: '📟', name: 'iPad', price: `$${rates.ipad}` },
-        { icon: '🎧', name: 'AirPods', price: `$${rates.airpods}` },
-        { icon: '🕶️', name: 'Meta Очки', price: `$${rates.meta_glasses}` },
-        { icon: '🎧', name: 'AirPods Max', price: `$${rates.airpods_max}` },
-        { icon: '📖', name: 'E-book', price: `$${rates.ebook}` },
-        { icon: '🎮', name: 'PlayStation 5 / Xbox', sub: 'по согласованию', price: 'по весу' }
+        { type: 'macbook', icon: '💻', name: 'MacBook', sub: 'меньше 3кг', price: `$${rates.macbook}` },
+        { type: 'laptop', icon: '💻', name: 'Ноутбук', sub: 'меньше 3кг', price: `$${rates.laptop}` },
+        { type: 'iphone', icon: '📱', name: 'iPhone', price: `$${rates.iphone}` },
+        { type: 'watch', icon: '⌚', name: 'Apple / Smart Watch', price: `$${rates.watch}` },
+        { type: 'ipad', icon: '📟', name: 'iPad', price: `$${rates.ipad}` },
+        { type: 'airpods', icon: '🎧', name: 'AirPods', price: `$${rates.airpods}` },
+        { type: 'meta_glasses', icon: '🕶️', name: 'Meta Очки', price: `$${rates.meta_glasses}` },
+        { type: 'airpods_max', icon: '🎧', name: 'AirPods Max', price: `$${rates.airpods_max}` },
+        { type: 'ebook', icon: '📖', name: 'E-book', price: `$${rates.ebook}` },
+        { type: 'ps5_xbox', icon: '🎮', name: 'PlayStation 5 / Xbox', sub: 'по согласованию', price: 'по весу' }
       ]
     },
     activeBaseRate() {
@@ -667,13 +681,46 @@ export default {
     },
     toggleFaq(index) {
       this.faqOpenIndex = this.faqOpenIndex === index ? null : index
+    },
+    isServiceSelected(id) {
+      return this.calcForm.services.includes(id)
+    },
+    async calculate() {
+      this.calcLoading = true
+      try {
+        const response = await calculatorAPI.calculate({
+          country: this.calcForm.country,
+          weight: this.calcForm.cargo_type === 'tech' && this.calcForm.tech_type !== 'ps5_xbox' ? 1 : this.calcForm.weight,
+          declared_value: this.calcForm.declared_value,
+          service_ids: this.calcForm.services,
+          item_type: this.calcForm.cargo_type === 'tech' ? this.calcForm.tech_type : 'regular'
+        })
+        const data = response.data?.data || response.data
+        this.calcResult = {
+          delivery_cost: data.delivery_cost,
+          insurance_cost: data.services?.find((service) => service.name?.toLowerCase().includes('insurance'))?.cost || 0,
+          services_cost: data.services_cost || data.services?.reduce((sum, service) => sum + (service.cost || 0), 0) || 0,
+          total: data.total_cost || data.total,
+          delivery_time: data.tariff?.delivery_time || this.selectedCalcTariff?.delivery_time || 'срок уточняется'
+        }
+      } catch (error) {
+        this.calcResult = null
+      } finally {
+        this.calcLoading = false
+      }
     }
   },
 
   async mounted() {
     try {
       const response = await tariffsAPI.getPublic()
-      this.tariffsList = response.data?.data || response.data || []
+      const tariffs = response.data?.data || response.data || []
+      this.tariffsList = Array.isArray(tariffs)
+        ? tariffs.filter((tariff) => tariff && typeof tariff.country === 'string' && tariff.country.trim())
+        : []
+      const servicesResponse = await servicesAPI.getAll()
+      const services = servicesResponse.data?.data || servicesResponse.data || []
+      if (Array.isArray(services)) this.availableServices = services
     } catch (error) {
       console.error('Failed to load tariffs on homepage:', error)
     }
