@@ -198,11 +198,11 @@
                     </div>
                   </div>
 
-                  <!-- Declared value input (if Insurance is selected) -->
-                  <div v-if="isInsuranceSelected" class="form-group bg-blue-50 border border-blue-100 p-3 rounded-lg">
-                    <label class="form-label text-blue-900">Стоимость товара ($) *</label>
-                    <input v-model.number="form.declared_value" type="number" step="0.1" min="0" required class="input-field border-blue-200 focus:border-primary"
-                      placeholder="Введите объявленную стоимость..." />
+                  <!-- Product value -->
+                  <div class="form-group bg-blue-50 border border-blue-100 p-3 rounded-lg">
+                    <label class="form-label text-blue-900">Стоимость товара ($)</label>
+                    <input v-model.number="form.declared_value" type="number" step="0.1" min="0" class="input-field border-blue-200 focus:border-primary"
+                      placeholder="Введите стоимость товара..." />
                   </div>
 
                   <!-- Calculation Breakdown -->

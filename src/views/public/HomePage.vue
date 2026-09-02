@@ -107,8 +107,8 @@
         </div>
       </div>
 
-      <!-- Pricing is maintained on the dedicated pricing page. -->
-      <div v-if="false" class="mt-16">
+      <!-- Dynamic pricing summary -->
+      <div class="mt-16">
         <div class="mb-8">
           <h3 class="text-2xl font-bold text-gray-900">🌍 Тарифы по направлениям доставки</h3>
           <p class="text-sm text-gray-500 mt-1">Цены за авиадоставку посылок в Таджикистан (Душанбе, Худжанд)</p>
@@ -157,7 +157,7 @@
         </div>
 
         <!-- Standalone Highlighted Direction for Kazakhstan -->
-        <div class="border-t border-gray-150 mt-6 pt-6">
+        <div v-if="kazakhstanTariff" class="border-t border-gray-150 mt-6 pt-6">
           <div class="bg-gradient-to-r from-primary to-blue-600 rounded-2xl p-6 text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-md border border-primary/20 relative overflow-hidden group">
             <!-- Glow background effect -->
             <div class="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -182,13 +182,13 @@
               <div class="text-center sm:text-right">
                 <span class="text-[9px] text-white/70 uppercase tracking-widest block font-bold">Сроки</span>
                 <span class="text-xs sm:text-sm font-bold flex items-center justify-center sm:justify-end gap-1 mt-0.5 text-white">
-                  ⏱ ≈5-10 раб. дней
+                  ⏱ ≈{{ kazakhstanTariff.delivery_time || '5-10 раб. дней' }}
                 </span>
               </div>
               <div class="h-8 w-px bg-white/30"></div>
               <div class="text-center">
                 <span class="text-[9px] text-white/70 uppercase tracking-widest block font-bold">Тариф за 1 кг</span>
-                <span class="text-xl sm:text-2xl font-black text-white">$12</span>
+                <span class="text-xl sm:text-2xl font-black text-white">${{ kazakhstanTariff.price_per_kg }}</span>
               </div>
             </div>
           </div>
@@ -400,7 +400,7 @@
     </section>
 
     <!-- Detailed Pricing Section -->
-    <section v-if="false" id="pricing" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="pricing" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-12">
         <span class="bg-primary-50 text-primary border border-primary-200 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
           Цены и оплата с 16 апреля 2026
@@ -435,7 +435,7 @@
             <h4 class="font-bold text-gray-900">Округление веса</h4>
           </div>
           <p class="text-xs text-gray-500 leading-relaxed mb-2">
-            • Вес <strong>до 1 кг</strong> округляется в большую сторону до 1 кг (например, 0.3 кг считается как 1 кг — $16).
+            • Вес <strong>до 1 кг</strong> округляется в большую сторону до 1 кг (например, 0.3 кг считается как 1 кг — ${{ activeBaseRate }}/кг).
           </p>
           <p class="text-xs text-gray-500 leading-relaxed">
             • Для посылок весом <strong>от 1 кг и более</strong> расчет ведется по точному фактическому весу (например, 1.3 кг или 2.7 кг).
@@ -548,12 +548,15 @@
 </template>
 
 <script>
+import { tariffsAPI } from '@/api/index.js'
+
 export default {
   name: 'HomePage',
 
   data() {
     return {
       trackingInput: '',
+      tariffsList: [],
       faqOpenIndex: null,
       faqs: [
         { q: 'Как узнать адрес склада в США?', a: 'Адреса наших складов приема в США указаны в личном кабинете. Для интернет-покупок используйте безналоговый склад в штате Делавэр: 1680 Porter Rd, Suite A-3, Bear, DE 19701, указав свой ID клиента.' },
@@ -566,6 +569,63 @@ export default {
   },
 
   computed: {
+    directionsPricing() {
+      return this.tariffsList.map((tariff) => {
+        const basePrice = parseFloat(tariff.price_per_kg) || 0
+        return {
+          country: tariff.country,
+          flag: this.countryFlag(tariff.country),
+          time: tariff.delivery_time || '5-10 раб. дней',
+          price: `$${basePrice}`,
+          note: `Минимальная стоимость — $${tariff.minimum_charge || 0}.`
+        }
+      })
+    },
+    techTariffs() {
+      const tariff = this.tariffsList.find((item) => {
+        const country = item.country.toLowerCase()
+        return country.includes('usa') || country.includes('сша')
+      }) || this.tariffsList[0]
+      const defaults = {
+        macbook: 100,
+        laptop: 100,
+        iphone: 100,
+        watch: 30,
+        ipad: 70,
+        airpods: 20,
+        meta_glasses: 20,
+        airpods_max: 25,
+        ebook: 15
+      }
+      const rates = tariff?.tech_rates && typeof tariff.tech_rates === 'object'
+        ? { ...defaults, ...tariff.tech_rates }
+        : defaults
+      return [
+        { icon: '💻', name: 'MacBook', sub: 'меньше 3кг', price: `$${rates.macbook}` },
+        { icon: '💻', name: 'Ноутбук', sub: 'меньше 3кг', price: `$${rates.laptop}` },
+        { icon: '📱', name: 'iPhone', price: `$${rates.iphone}` },
+        { icon: '⌚', name: 'Apple / Smart Watch', price: `$${rates.watch}` },
+        { icon: '📟', name: 'iPad', price: `$${rates.ipad}` },
+        { icon: '🎧', name: 'AirPods', price: `$${rates.airpods}` },
+        { icon: '🕶️', name: 'Meta Очки', price: `$${rates.meta_glasses}` },
+        { icon: '🎧', name: 'AirPods Max', price: `$${rates.airpods_max}` },
+        { icon: '📖', name: 'E-book', price: `$${rates.ebook}` },
+        { icon: '🎮', name: 'PlayStation 5 / Xbox', sub: 'по согласованию', price: 'по весу' }
+      ]
+    },
+    activeBaseRate() {
+      const tariff = this.tariffsList.find((item) => {
+        const country = item.country.toLowerCase()
+        return country.includes('usa') || country.includes('сша')
+      }) || this.tariffsList[0]
+      return tariff ? parseFloat(tariff.price_per_kg) : 16
+    },
+    kazakhstanTariff() {
+      return this.tariffsList.find((item) => {
+        const country = item.country.toLowerCase()
+        return country.includes('kazakhstan') || country.includes('казахстан')
+      })
+    },
     stats() {
       return [
         { value: '10,000+', label: 'Довольных клиентов' },
@@ -586,6 +646,16 @@ export default {
   },
 
   methods: {
+    countryFlag(country) {
+      const value = country.toLowerCase()
+      if (value.includes('usa') || value.includes('сша')) return '🇺🇸'
+      if (value.includes('germany') || value.includes('германи')) return '🇩🇪'
+      if (value.includes('uk') || value.includes('англия') || value.includes('великобрита')) return '🇬🇧'
+      if (value.includes('spain') || value.includes('испани')) return '🇪🇸'
+      if (value.includes('italy') || value.includes('итали')) return '🇮🇹'
+      if (value.includes('kazakhstan') || value.includes('казахстан')) return '🇰🇿'
+      return '🌍'
+    },
     scrollDirections(dir) {
       const container = this.$refs.directionsScroll;
       if (!container) return;
@@ -605,6 +675,15 @@ export default {
     },
     toggleFaq(index) {
       this.faqOpenIndex = this.faqOpenIndex === index ? null : index
+    }
+  },
+
+  async mounted() {
+    try {
+      const response = await tariffsAPI.getPublic()
+      this.tariffsList = response.data?.data || response.data || []
+    } catch (error) {
+      console.error('Failed to load tariffs on homepage:', error)
     }
   }
 }
