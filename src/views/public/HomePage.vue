@@ -28,10 +28,6 @@
               </svg>
               {{ $t('home.trackBtn') }}
             </a>
-            <a href="#calculator"
-              class="btn btn-lg border-2 border-white text-white hover:bg-white hover:text-primary font-semibold no-underline transition-all">
-              {{ $t('home.calculateBtn') }}
-            </a>
           </div>
         </div>
       </div>
@@ -111,8 +107,8 @@
         </div>
       </div>
 
-      <!-- Destinations Pricing Widget -->
-      <div class="mt-16">
+      <!-- Pricing is maintained on the dedicated pricing page. -->
+      <div v-if="false" class="mt-16">
         <div class="mb-8">
           <h3 class="text-2xl font-bold text-gray-900">🌍 Тарифы по направлениям доставки</h3>
           <p class="text-sm text-gray-500 mt-1">Цены за авиадоставку посылок в Таджикистан (Душанбе, Худжанд)</p>
@@ -227,7 +223,7 @@
     </section>
 
     <!-- Interactive Calculator -->
-    <section id="calculator" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section v-if="false" id="calculator" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-12">
         <span class="bg-primary-50 text-primary border border-primary-200 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
           Калькулятор
@@ -404,7 +400,7 @@
     </section>
 
     <!-- Detailed Pricing Section -->
-    <section id="pricing" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section v-if="false" id="pricing" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-12">
         <span class="bg-primary-50 text-primary border border-primary-200 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
           Цены и оплата с 16 апреля 2026
@@ -552,7 +548,7 @@
 </template>
 
 <script>
-import { calculatorAPI, servicesAPI } from '@/api/index.js'
+import { } from '@/api/index.js'
 
 export default {
   name: 'HomePage',
@@ -560,51 +556,13 @@ export default {
   data() {
     return {
       trackingInput: '',
-      calcLoading: false,
-      calcResult: null,
-      calcForm: {
-        country: '',
-        cargo_type: 'regular',
-        tech_type: '',
-        weight: '',
-        declared_value: 0,
-        services: []
-      },
-      availableServices: [
-        { id: 'insurance', name: 'Страхование', description: 'Страховка (2% от стоимости)', price: 0, percentage: 2, price_type: 'percentage' },
-        { id: 'f8b65003-8d46-4ab5-8e46-db4e4e1b6789', name: 'Осмотр товара', description: 'Проверка содержимого', price: 5, price_type: 'fixed' },
-        { id: 'fa976004-9e57-4c06-8f57-eb5e5e2c7890', name: 'Проверка работоспособности', description: 'Проверка работоспособности приборов', price: 10, price_type: 'fixed' },
-        { id: '11111111-2222-3333-4444-555555555555', name: 'Сделать фото', description: 'Детальные фото товаров', price: 2, price_type: 'fixed' },
-        { id: '22222222-3333-4444-5555-666666666666', name: 'Дополнительная упаковка', description: 'Безопасная защитная упаковка', price: 2, price_type: 'fixed' }
-      ],
-      techTariffs: [
-        { icon: '💻', name: 'MacBook', sub: 'меньше 3кг', price: '$100' },
-        { icon: '💻', name: 'Ноутбук', sub: 'меньше 3кг', price: '$100' },
-        { icon: '📱', name: 'iPhone', price: '$100' },
-        { icon: '⌚', name: 'Apple / Smart Watch', price: '$30' },
-        { icon: '📟', name: 'iPad', price: '$70' },
-        { icon: '🎧', name: 'AirPods', price: '$20' },
-        { icon: '🕶️', name: 'Meta Очки', price: '$20' },
-        { icon: '🎧', name: 'AirPods Max', price: '$25' },
-        { icon: '📖', name: 'E-book', price: '$15' },
-        { icon: '🎮', name: 'PlayStation 5 / Xbox', sub: 'по согласованию', price: 'по весу' }
-      ],
       faqOpenIndex: null,
       faqs: [
         { q: 'Как узнать адрес склада в США?', a: 'Адреса наших складов приема в США указаны в личном кабинете. Для интернет-покупок используйте безналоговый склад в штате Делавэр: 1680 Porter Rd, Suite A-3, Bear, DE 19701, указав свой ID клиента.' },
-        { q: 'Сколько стоит доставка?', a: 'Стоимость доставки обычного груза по весу составляет: до 100 кг – $16/кг, от 100 кг – $15/кг, от 1000 кг – $11/кг. Для техники действуют фиксированные тарифы (например, MacBook/ноутбуки/iPhone – $100, iPad – $70, AirPods – $20, часы – $30).' },
         { q: 'Как долго идёт посылка?', a: 'Доставка из США занимает 6-10 рабочих дней, из Германии, Испании и Италии — 7-14 рабочих дней. Сроки зависят от расписания авиарейсов и скорости таможенного оформления.' },
-        { q: 'Как рассчитывается вес и округление?', a: 'Вес до 1 кг округляется до 1 кг (например, 0.4 кг рассчитывается как 1 кг). Если вес составляет 1.0 кг и выше (например, 1.2 кг или 2.8 кг), расчет ведется строго по фактическому весу.' },
         { q: 'Как отследить посылку?', a: 'Вы можете ввести трек-номер на странице отслеживания или отслеживать все свои посылки в личном кабинете после регистрации.' },
         { q: 'Что нельзя отправлять?', a: 'Запрещены оружие, боеприпасы, лекарства без рецепта, опасные жидкости, литиевые аккумуляторы отдельно от приборов, алкоголь и табачные изделия. Полный список смотрите на странице Условий.' },
-        { q: 'Есть ли страхование?', a: 'Да, вы можете застраховать вашу посылку. Стоимость страховки составляет 2% от объявленной ценности товара. Это гарантирует возмещение в случае утери груза.' }
-      ],
-      directionsPricing: [
-        { country: 'США', flag: '🇺🇸', time: '4-9 раб. дней', price: '$16', note: 'Прямые рейсы из Нью-Йорка и Филадельфии еженедельно. Обычный груз до 100 кг. От 100 кг – $15, от 1000 кг – $11.' },
-        { country: 'Англия', flag: '🇬🇧', time: '5-10 раб. дней', price: '$12', note: 'Доставка посылок и сборных грузов из Великобритании.' },
-        { country: 'Германия', flag: '🇩🇪', time: '2-6 раб. дней', price: '$12', note: 'Сборные грузы со всей Европы через склад в Мюнхене.' },
-        { country: 'Испания', flag: '🇪🇸', time: '7-14 раб. дней', price: '$12', note: 'Доставка посылок и товаров из Испании транзитом через Европу.' },
-        { country: 'Италия', flag: '🇮🇹', time: '7-14 раб. дней', price: '$12', note: 'Прямые поставки брендовой одежды и обуви из Италии.' }
+        { q: 'Есть ли страхование?', a: 'Да, ваши посылки можно застраховать. Подробности уточняйте у службы поддержки.' }
       ]
     }
   },
@@ -649,107 +607,9 @@ export default {
     },
     toggleFaq(index) {
       this.faqOpenIndex = this.faqOpenIndex === index ? null : index
-    },
-    isServiceSelected(id) {
-      return this.calcForm.services.includes(id)
-    },
-    async calculate() {
-      this.calcLoading = true
-      try {
-        const response = await calculatorAPI.calculate({
-          country: this.calcForm.country,
-          weight: this.calcForm.cargo_type === 'tech' && this.calcForm.tech_type !== 'ps5_xbox' ? 1.0 : this.calcForm.weight,
-          declared_value: this.calcForm.declared_value,
-          service_ids: this.calcForm.services,
-          item_type: this.calcForm.cargo_type === 'tech' ? this.calcForm.tech_type : 'regular'
-        })
-        
-        const backendData = response.data?.data || response.data
-        if (backendData) {
-          this.calcResult = {
-            delivery_cost: backendData.delivery_cost,
-            insurance_cost: backendData.services?.find(s => s.name?.toLowerCase().includes('insurance') || s.service_id === 'insurance')?.cost || 0,
-            services_cost: backendData.services?.filter(s => !s.name?.toLowerCase().includes('insurance') && s.service_id !== 'insurance').reduce((sum, s) => sum + s.cost, 0) || backendData.services_cost,
-            total: backendData.total_cost || backendData.total,
-            delivery_time: backendData.tariff?.delivery_time || ((this.calcForm.country === 'germany' || this.calcForm.country === 'spain' || this.calcForm.country === 'italy') ? '7-14 дней' : '6-10 дней')
-          }
-        } else {
-          this.calcResult = this.calculateLocally()
-        }
-      } catch (err) {
-        console.warn('API error, falling back to local calculation:', err)
-        this.calcResult = this.calculateLocally()
-      } finally {
-        this.calcLoading = false
-      }
-    },
-
-    calculateLocally() {
-      const weightVal = parseFloat(this.calcForm.weight || 0)
-      let baseCost = 0
-
-      const techRates = {
-        macbook: 100,
-        laptop: 100,
-        iphone: 100,
-        watch: 30,
-        ipad: 70,
-        airpods: 20,
-        meta_glasses: 20,
-        airpods_max: 25,
-        ebook: 15
-      }
-
-      const isTechItem = this.calcForm.cargo_type === 'tech' && this.calcForm.tech_type !== 'ps5_xbox'
-      if (isTechItem && techRates[this.calcForm.tech_type]) {
-        baseCost = techRates[this.calcForm.tech_type]
-      } else {
-        const calculatedWeight = weightVal < 1.0 ? 1.0 : weightVal
-        let rate = 16
-        if (calculatedWeight >= 1000) {
-          rate = 11
-        } else if (calculatedWeight >= 100) {
-          rate = 15
-        }
-        baseCost = calculatedWeight * rate
-      }
-
-      const isInsurance = this.calcForm.services.includes('insurance')
-      const insuranceCost = isInsurance ? (this.calcForm.declared_value || 0) * 0.02 : 0
-
-      const servicesCost = this.availableServices
-        .filter(s => this.calcForm.services.includes(s.id) && s.id !== 'insurance')
-        .reduce((sum, s) => sum + (parseFloat(s.price) || 0), 0)
-
-      return {
-        delivery_cost: baseCost,
-        insurance_cost: insuranceCost,
-        services_cost: servicesCost,
-        total: baseCost + insuranceCost + servicesCost,
-        delivery_time: (this.calcForm.country === 'germany' || this.calcForm.country === 'spain' || this.calcForm.country === 'italy') ? '7-14 дней' : '6-10 дней'
-      }
     }
   },
 
-  mounted() {
-    servicesAPI.getAll().then(r => {
-      const fetched = r.data?.data || r.data || []
-      if (fetched.length > 0) {
-        this.availableServices = fetched.map(fs => {
-          const isIns = fs.name?.toLowerCase().includes('insurance') || fs.price_type === 'percentage'
-          return {
-            id: fs.id,
-            name: fs.name,
-            description: fs.description || (isIns ? 'Страховка (2% от стоимости)' : ''),
-            price: parseFloat(fs.price) || 0,
-            percentage: parseFloat(fs.percentage) || 2,
-            price_type: fs.price_type
-          }
-        })
-      }
-    }).catch(err => {
-      console.warn('Failed to load services in landing page, using defaults:', err)
-    })
-  }
+  mounted() {}
 }
 </script>
