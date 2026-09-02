@@ -152,7 +152,7 @@
             <div class="p-6">
               <h3 class="text-lg font-bold mb-4">{{ isEdit ? 'Редактировать отправление' : 'Создать отправление' }}</h3>
 
-              <form @submit.prevent="saveParcel" @keydown.enter.prevent class="space-y-4">
+              <form @submit.prevent @keydown.enter.prevent class="space-y-4">
                 <div class="grid grid-cols-2 gap-4">
                   <div>
                     <label class="form-label">Трек-номер:</label>
@@ -318,7 +318,7 @@
                   <button type="button" @click="showModal = false" class="btn btn-ghost flex-1 border border-gray-200">
                     Отмена
                   </button>
-                  <button type="submit" class="btn btn-primary flex-1" :disabled="saving">
+                  <button type="button" @click="saveParcel" class="btn btn-primary flex-1" :disabled="saving">
                     Сохранить
                   </button>
                 </div>
