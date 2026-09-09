@@ -13,6 +13,7 @@ const FaqPage = () => import('@/views/public/FaqPage.vue')
 const TermsPage = () => import('@/views/public/TermsPage.vue')
 const PrivacyPage = () => import('@/views/public/PrivacyPage.vue')
 const LoginPage = () => import('@/views/public/LoginPage.vue')
+const ForgotPasswordPage = () => import('@/views/public/ForgotPasswordPage.vue')
 const RegisterPage = () => import('@/views/public/RegisterPage.vue')
 const ServicesPage = () => import('@/views/public/ServicesPage.vue')
 const ShopsUsaPage = () => import('@/views/public/ShopsUsaPage.vue')
@@ -69,6 +70,7 @@ const routes = [
       { path: 'terms', name: 'terms', component: TermsPage },
       { path: 'privacy', name: 'privacy', component: PrivacyPage },
       { path: 'login', name: 'login', component: LoginPage, meta: { guestOnly: true } },
+      { path: 'forgot-password', name: 'forgot-password', component: ForgotPasswordPage, meta: { guestOnly: true } },
       { path: 'register', name: 'register', component: RegisterPage, meta: { guestOnly: true } }
     ]
   },

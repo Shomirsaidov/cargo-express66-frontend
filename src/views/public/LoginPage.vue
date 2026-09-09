@@ -64,7 +64,7 @@
               <input v-model="form.remember" type="checkbox" class="rounded border-gray-300 text-primary" />
               <span class="text-sm text-gray-600">Запомнить меня</span>
             </label>
-            <a href="#" class="text-sm text-primary hover:underline">{{ $t('auth.forgotPassword') }}</a>
+            <RouterLink to="/forgot-password" class="text-sm text-primary hover:underline">{{ $t('auth.forgotPassword') }}</RouterLink>
           </div>
 
           <button type="submit" :disabled="loading" class="btn btn-primary w-full btn-lg">
