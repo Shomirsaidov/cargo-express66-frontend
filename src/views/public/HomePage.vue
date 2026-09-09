@@ -709,34 +709,7 @@ export default {
       } finally {
         this.calcLoading = false
       }
-    }
-  },
-
-  async mounted() {
-    await this.loadTariffs()
-    await this.loadServices()
-
-    // Reload tariffs every 5 minutes to keep prices fresh
-    this.tariffRefreshInterval = setInterval(() => {
-      this.loadTariffs()
-    }, 5 * 60 * 1000)
-
-    // Also reload when window regains focus (user returns to tab)
-    window.addEventListener('focus', () => {
-      this.loadTariffs()
-    })
-  },
-
-  beforeUnmount() {
-    if (this.tariffRefreshInterval) {
-      clearInterval(this.tariffRefreshInterval)
-    }
-    window.removeEventListener('focus', () => {
-      this.loadTariffs()
-    })
-  },
-
-  methods: {
+    },
     countryFlag(country) {
       const value = country.toLowerCase()
       if (value.includes('usa') || value.includes('сша')) return '🇺🇸'
@@ -831,5 +804,28 @@ export default {
         console.error('[HOME] Failed to load services:', error)
       }
     }
+  },
+
+  async mounted() {
+    await this.loadTariffs()
+    await this.loadServices()
+
+    this.tariffRefreshInterval = setInterval(() => {
+      this.loadTariffs()
+    }, 5 * 60 * 1000)
+
+    window.addEventListener('focus', () => {
+      this.loadTariffs()
+    })
+  },
+
+  beforeUnmount() {
+    if (this.tariffRefreshInterval) {
+      clearInterval(this.tariffRefreshInterval)
+    }
+    window.removeEventListener('focus', () => {
+      this.loadTariffs()
+    })
   }
+}
 </script>
