@@ -2,9 +2,14 @@
   <div>
     <div class="flex items-center justify-between mb-6">
       <h1 class="page-title">{{ $t('admin.dashboard') }}</h1>
-      <span class="text-sm text-gray-500">Обновлено: {{ now }}</span>
+      <span class="text-sm text-gray-500">{{ loading ? 'Загрузка...' : `Обновлено: ${now}` }}</span>
     </div>
 
+    <div v-if="loading" class="flex items-center justify-center h-64">
+      <p class="text-gray-500">Загрузка данных...</p>
+    </div>
+
+    <template v-else-if="dashData">
     <!-- Stats grid -->
     <div class="grid grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
       <div v-for="stat in stats" :key="stat.key" class="stat-card">
@@ -117,6 +122,11 @@
         </div>
       </div>
     </div>
+    </template>
+
+    <div v-else class="text-center text-gray-500 py-8">
+      Не удалось загрузить данные
+    </div>
   </div>
 </template>
 
@@ -138,28 +148,30 @@ export default {
       return new Date().toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
     },
     stats() {
-      const d = this.dashData || {}
+      if (!this.dashData) return []
+      const d = this.dashData
       return [
-        { key: 'customers', icon: 'users', label: this.$t('admin.totalCustomers'), value: d.total_customers || 0, bg: '#EFF4FB' },
-        { key: 'active', icon: 'package', label: this.$t('admin.activeShipments'), value: d.active_shipments || 0, bg: '#EFF4FB' },
-        { key: 'delivered', icon: 'check', label: this.$t('admin.deliveredShipments'), value: d.delivered_shipments || 0, bg: '#F0FFF4' },
-        { key: 'unknown', icon: 'help', label: this.$t('admin.unknownRecipients'), value: d.unknown_recipients || 0, bg: '#FFF0F0' },
-        { key: 'revenue', icon: 'revenue', label: this.$t('admin.revenue'), value: `$${d.revenue || 0}`, bg: '#FFFBEB' },
-        { key: 'weekly', icon: 'weekly', label: this.$t('admin.weeklyVolume'), value: d.weekly_volume || 0, bg: '#F3F4F6' }
+        { key: 'customers', icon: 'users', label: this.$t('admin.totalCustomers'), value: d.total_customers, bg: '#EFF4FB' },
+        { key: 'active', icon: 'package', label: this.$t('admin.activeShipments'), value: d.active_shipments, bg: '#EFF4FB' },
+        { key: 'delivered', icon: 'check', label: this.$t('admin.deliveredShipments'), value: d.delivered_shipments, bg: '#F0FFF4' },
+        { key: 'unknown', icon: 'help', label: this.$t('admin.unknownRecipients'), value: d.unknown_recipients, bg: '#FFF0F0' },
+        { key: 'revenue', icon: 'revenue', label: this.$t('admin.revenue'), value: `$${d.revenue}`, bg: '#FFFBEB' },
+        { key: 'weekly', icon: 'weekly', label: this.$t('admin.weeklyVolume'), value: d.weekly_volume, bg: '#F3F4F6' }
       ]
     },
     weeklyBars() {
+      if (!this.dashData?.weekly_shipments) return []
       const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
-      const data = this.dashData?.weekly_shipments || [12, 19, 8, 15, 22, 5, 3]
-      return days.map((day, i) => ({ day, count: data[i] || 0 }))
+      return days.map((day, i) => ({ day, count: this.dashData.weekly_shipments[i] }))
     },
     monthlyRevenue() {
+      if (!this.dashData?.monthly_revenue) return []
       const months = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн']
-      const data = this.dashData?.monthly_revenue || [1200, 1800, 1500, 2200, 1900, 2500]
-      return months.map((month, i) => ({ month, amount: data[i] || 0 }))
+      return months.map((month, i) => ({ month, amount: this.dashData.monthly_revenue[i] }))
     },
     statusBreakdown() {
-      const d = this.dashData?.status_breakdown || {}
+      if (!this.dashData?.status_breakdown) return []
+      const d = this.dashData.status_breakdown
       const total = Object.values(d).reduce((s, v) => s + v, 0) || 1
       const colors = {
         awaiting_arrival: '#9CA3AF', received_at_warehouse: '#3B82F6',
@@ -171,12 +183,7 @@ export default {
       })).slice(0, 5)
     },
     recentActivity() {
-      return this.dashData?.recent_activity || [
-        { id: 1, icon: 'package', text: 'Новая посылка: 1Z999AA10...', time: '5 мин назад' },
-        { id: 2, icon: 'user', text: 'Новый клиент: Иван И.', time: '12 мин назад' },
-        { id: 3, icon: 'check', text: 'Статус обновлён: Доставлено', time: '23 мин назад' },
-        { id: 4, icon: 'airplane', text: 'AWB-001 отправлен', time: '1 ч назад' }
-      ]
+      return this.dashData?.recent_activity || []
     }
   },
 
@@ -197,7 +204,7 @@ export default {
       const r = await adminAPI.getDashboard()
       this.dashData = r.data
     } catch (e) {
-      // Use mock data
+      console.error('Failed to load dashboard data:', e)
     } finally {
       this.loading = false
     }
