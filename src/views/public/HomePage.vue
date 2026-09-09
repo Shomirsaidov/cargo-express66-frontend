@@ -551,6 +551,7 @@ export default {
       tariffsList: [],
       calcLoading: false,
       calcResult: null,
+      tariffRefreshInterval: null,
       calcForm: {
         country: '',
         cargo_type: 'regular',
@@ -712,18 +713,115 @@ export default {
   },
 
   async mounted() {
-    try {
-      const response = await tariffsAPI.getPublic()
-      const tariffs = response.data?.data || response.data || []
-      this.tariffsList = Array.isArray(tariffs)
-        ? tariffs.filter((tariff) => tariff && typeof tariff.country === 'string' && tariff.country.trim())
-        : []
-      const servicesResponse = await servicesAPI.getAll()
-      const services = servicesResponse.data?.data || servicesResponse.data || []
-      if (Array.isArray(services)) this.availableServices = services
-    } catch (error) {
-      console.error('Failed to load tariffs on homepage:', error)
+    await this.loadTariffs()
+    await this.loadServices()
+
+    // Reload tariffs every 5 minutes to keep prices fresh
+    this.tariffRefreshInterval = setInterval(() => {
+      this.loadTariffs()
+    }, 5 * 60 * 1000)
+
+    // Also reload when window regains focus (user returns to tab)
+    window.addEventListener('focus', () => {
+      this.loadTariffs()
+    })
+  },
+
+  beforeUnmount() {
+    if (this.tariffRefreshInterval) {
+      clearInterval(this.tariffRefreshInterval)
+    }
+    window.removeEventListener('focus', () => {
+      this.loadTariffs()
+    })
+  },
+
+  methods: {
+    countryFlag(country) {
+      const value = country.toLowerCase()
+      if (value.includes('usa') || value.includes('сша')) return '🇺🇸'
+      if (value.includes('germany') || value.includes('германи')) return '🇩🇪'
+      if (value.includes('uk') || value.includes('англия') || value.includes('великобрита')) return '🇬🇧'
+      if (value.includes('spain') || value.includes('испани')) return '🇪🇸'
+      if (value.includes('italy') || value.includes('итали')) return '🇮🇹'
+      if (value.includes('kazakhstan') || value.includes('казахстан')) return '🇰🇿'
+      return '🌍'
+    },
+    scrollDirections(dir) {
+      const container = this.$refs.directionsScroll;
+      if (!container) return;
+      const scrollAmount = 300;
+      if (dir === 'left') {
+        container.scrollLeft -= scrollAmount;
+      } else {
+        container.scrollLeft += scrollAmount;
+      }
+    },
+    goToTracking() {
+      if (this.trackingInput.trim()) {
+        this.$router.push({ name: 'tracking', query: { q: this.trackingInput.trim() } })
+      } else {
+        this.$router.push({ name: 'tracking' })
+      }
+    },
+    toggleFaq(index) {
+      this.faqOpenIndex = this.faqOpenIndex === index ? null : index
+    },
+    isServiceSelected(id) {
+      return this.calcForm.services.includes(id)
+    },
+    async calculate() {
+      this.calcLoading = true
+      try {
+        const response = await calculatorAPI.calculate({
+          country: this.calcForm.country,
+          weight: this.calcForm.cargo_type === 'tech' && this.calcForm.tech_type !== 'ps5_xbox' ? 1 : this.calcForm.weight,
+          declared_value: this.calcForm.declared_value,
+          service_ids: this.calcForm.services,
+          item_type: this.calcForm.cargo_type === 'tech' ? this.calcForm.tech_type : 'regular'
+        })
+        const data = response.data?.data || response.data
+        this.calcResult = {
+          delivery_cost: data.delivery_cost,
+          insurance_cost: data.services?.find((service) => service.name?.toLowerCase().includes('insurance'))?.cost || 0,
+          services_cost: data.services_cost || data.services?.reduce((sum, service) => sum + (service.cost || 0), 0) || 0,
+          total: data.total_cost || data.total,
+          delivery_time: data.tariff?.delivery_time || this.selectedCalcTariff?.delivery_time || 'срок уточняется'
+        }
+      } catch (error) {
+        this.calcResult = null
+      } finally {
+        this.calcLoading = false
+      }
+    },
+
+    async loadTariffs() {
+      try {
+        const response = await tariffsAPI.getPublic()
+        const tariffs = response.data?.data || response.data || []
+        const newTariffs = Array.isArray(tariffs)
+          ? tariffs.filter((tariff) => tariff && typeof tariff.country === 'string' && tariff.country.trim())
+          : []
+        if (newTariffs.length > 0) {
+          this.tariffsList = newTariffs
+          console.log('[HOME] Tariffs reloaded:', newTariffs.map(t => `${t.country}=$${t.price_per_kg}`).join(', '))
+        }
+      } catch (error) {
+        console.error('[HOME] Failed to load tariffs:', error)
+      }
+    },
+
+    async loadServices() {
+      try {
+        const servicesResponse = await servicesAPI.getAll()
+        const services = servicesResponse.data?.data || servicesResponse.data || []
+        if (Array.isArray(services) && services.length > 0) {
+          this.availableServices = services
+          console.log('[HOME] Services reloaded:', services.length, 'items')
+        }
+      } catch (error) {
+        console.error('[HOME] Failed to load services:', error)
+      }
     }
   }
-}
 </script>

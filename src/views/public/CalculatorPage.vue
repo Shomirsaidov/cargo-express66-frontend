@@ -225,6 +225,7 @@ export default {
       },
       result: null,
       loading: false,
+      tariffRefreshInterval: null,
       availableServices: [
         { id: 'insurance', name: 'Страхование', description: 'Страховка (2% от стоимости)', price: 0, percentage: 2, price_type: 'percentage' },
         { id: 'f8b65003-8d46-4ab5-8e46-db4e4e1b6789', name: 'Осмотр товара', description: 'Проверка содержимого', price: 5, price_type: 'fixed' },
@@ -376,32 +377,63 @@ export default {
   },
 
   async mounted() {
-    // Load active tariffs from API
-    try {
-      const r = await tariffsAPI.getPublic()
-      this.tariffsList = r.data?.data || r.data || []
-    } catch (e) {
-      console.error('Failed to load tariffs:', e)
-    }
+    await this.loadTariffs()
+    await this.loadServices()
 
-    // Load services from API if available
-    servicesAPI.getAll().then(r => {
-      const fetched = r.data?.data || r.data || []
-      if (fetched.length > 0) {
-        // Map services but retain fallback IDs for local fallback
-        this.availableServices = fetched.map(fs => {
-          const isIns = fs.name?.toLowerCase().includes('insurance') || fs.price_type === 'percentage'
-          return {
-            id: fs.id,
-            name: fs.name,
-            description: fs.description || (isIns ? 'Страховка (2% от стоимости)' : ''),
-            price: parseFloat(fs.price) || 0,
-            percentage: parseFloat(fs.percentage) || 2,
-            price_type: fs.price_type || (isIns ? 'percentage' : 'fixed')
-          }
-        })
+    // Reload tariffs every 5 minutes to keep prices fresh
+    this.tariffRefreshInterval = setInterval(() => {
+      this.loadTariffs()
+    }, 5 * 60 * 1000)
+
+    // Also reload when window regains focus (user returns to tab)
+    window.addEventListener('focus', () => {
+      this.loadTariffs()
+    })
+  },
+
+  beforeUnmount() {
+    if (this.tariffRefreshInterval) {
+      clearInterval(this.tariffRefreshInterval)
+    }
+    window.removeEventListener('focus', () => {
+      this.loadTariffs()
+    })
+  },
+
+  methods: {
+    async loadTariffs() {
+      try {
+        const r = await tariffsAPI.getPublic()
+        const newTariffs = r.data?.data || r.data || []
+        if (newTariffs.length > 0) {
+          this.tariffsList = newTariffs
+          console.log('[CALCULATOR] Tariffs reloaded:', newTariffs.map(t => `${t.country}=$${t.price_per_kg}`).join(', '))
+        }
+      } catch (e) {
+        console.error('[CALCULATOR] Failed to load tariffs:', e)
       }
-    }).catch(() => {})
-  }
+    },
+
+    async loadServices() {
+      try {
+        const r = await servicesAPI.getAll()
+        const fetched = r.data?.data || r.data || []
+        if (fetched.length > 0) {
+          this.availableServices = fetched.map(fs => {
+            const isIns = fs.name?.toLowerCase().includes('insurance') || fs.price_type === 'percentage'
+            return {
+              id: fs.id,
+              name: fs.name,
+              description: fs.description || (isIns ? 'Страховка (2% от стоимости)' : ''),
+              price: parseFloat(fs.price) || 0,
+              percentage: parseFloat(fs.percentage) || 2,
+              price_type: fs.price_type || (isIns ? 'percentage' : 'fixed')
+            }
+          })
+        }
+      } catch (e) {
+        console.error('[CALCULATOR] Failed to load services:', e)
+      }
+    }
 }
 </script>
