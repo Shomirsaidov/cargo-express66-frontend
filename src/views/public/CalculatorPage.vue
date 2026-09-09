@@ -378,34 +378,8 @@ export default {
         total: baseCost + insuranceCost + servicesCost,
         delivery_time: this.selectedTariff?.delivery_time || ((this.form.country === 'germany' || this.form.country === 'spain' || this.form.country === 'italy') ? '7-14 дней' : '6-10 дней')
       }
-    }
-  },
+    },
 
-  async mounted() {
-    await this.loadTariffs()
-    await this.loadServices()
-
-    // Reload tariffs every 5 minutes to keep prices fresh
-    this.tariffRefreshInterval = setInterval(() => {
-      this.loadTariffs()
-    }, 5 * 60 * 1000)
-
-    // Also reload when window regains focus (user returns to tab)
-    window.addEventListener('focus', () => {
-      this.loadTariffs()
-    })
-  },
-
-  beforeUnmount() {
-    if (this.tariffRefreshInterval) {
-      clearInterval(this.tariffRefreshInterval)
-    }
-    window.removeEventListener('focus', () => {
-      this.loadTariffs()
-    })
-  },
-
-  methods: {
     async loadTariffs(retryCount = 0) {
       try {
         const r = await tariffsAPI.getPublic()
@@ -448,5 +422,28 @@ export default {
         console.error('[CALCULATOR] Failed to load services:', e)
       }
     }
+  },
+
+  async mounted() {
+    await this.loadTariffs()
+    await this.loadServices()
+
+    this.tariffRefreshInterval = setInterval(() => {
+      this.loadTariffs()
+    }, 5 * 60 * 1000)
+
+    window.addEventListener('focus', () => {
+      this.loadTariffs()
+    })
+  },
+
+  beforeUnmount() {
+    if (this.tariffRefreshInterval) {
+      clearInterval(this.tariffRefreshInterval)
+    }
+    window.removeEventListener('focus', () => {
+      this.loadTariffs()
+    })
+  }
 }
 </script>
