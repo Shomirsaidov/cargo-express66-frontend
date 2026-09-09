@@ -30,8 +30,10 @@ export const useAuthStore = defineStore('auth', {
         localStorage.setItem('user', JSON.stringify(customer))
         return { success: true, user: customer }
       } catch (err) {
-        this.error = err.response?.data?.error || err.response?.data?.message || 'Login failed'
-        return { success: false, error: this.error }
+        const errorMsg = this.extractErrorMessage(err, 'login')
+        this.error = errorMsg
+        console.error('[AUTH] Login error:', err.response?.status, err.response?.data, err.message)
+        return { success: false, error: errorMsg }
       } finally {
         this.loading = false
       }
@@ -49,8 +51,10 @@ export const useAuthStore = defineStore('auth', {
         localStorage.setItem('user', JSON.stringify(customer))
         return { success: true, user: customer }
       } catch (err) {
-        this.error = err.response?.data?.error || err.response?.data?.message || 'Registration failed'
-        return { success: false, error: this.error }
+        const errorMsg = this.extractErrorMessage(err, 'registration')
+        this.error = errorMsg
+        console.error('[AUTH] Registration error:', err.response?.status, err.response?.data, err.message)
+        return { success: false, error: errorMsg }
       } finally {
         this.loading = false
       }
@@ -80,11 +84,50 @@ export const useAuthStore = defineStore('auth', {
         localStorage.setItem('user', JSON.stringify(this.user))
         return { success: true }
       } catch (err) {
-        this.error = err.response?.data?.message || 'Update failed'
-        return { success: false, error: this.error }
+        const errorMsg = this.extractErrorMessage(err, 'profile update')
+        this.error = errorMsg
+        console.error('[AUTH] Profile update error:', err.response?.status, err.response?.data, err.message)
+        return { success: false, error: errorMsg }
       } finally {
         this.loading = false
       }
+    },
+
+    extractErrorMessage(err, context = 'request') {
+      const status = err.response?.status
+      const data = err.response?.data
+
+      // Handle validation errors (status 422)
+      if (status === 422) {
+        const details = data?.details
+        if (Array.isArray(details) && details.length > 0) {
+          const fieldErrors = details.map(e => {
+            const field = e.path || e.param || 'field'
+            const message = e.msg || e.message || 'Invalid value'
+            return `${field}: ${message}`
+          })
+          return `Validation error:\n${fieldErrors.join('\n')}`
+        }
+        return data?.error || 'Validation failed'
+      }
+
+      // Handle specific error statuses
+      if (status === 409) {
+        return data?.error || 'Email already registered'
+      }
+      if (status === 403) {
+        return data?.error || 'Account is deactivated'
+      }
+      if (status === 401) {
+        return data?.error || 'Invalid credentials'
+      }
+      if (status === 400) {
+        return data?.error || 'Bad request'
+      }
+
+      // Generic error handling
+      const errorMsg = data?.error || data?.message || err.message || `${context} failed`
+      return errorMsg
     },
 
     logout() {

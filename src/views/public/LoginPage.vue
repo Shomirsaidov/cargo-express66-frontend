@@ -12,11 +12,14 @@
       <div class="card">
         <!-- Error alert -->
         <div v-if="error"
-          class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600 flex items-center gap-2">
-          <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600 flex gap-2 whitespace-pre-line">
+          <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
-          {{ error }}
+          <div>
+            <strong>{{ errorTitle }}</strong><br>
+            {{ error }}
+          </div>
         </div>
 
         <form @submit.prevent="handleLogin" class="space-y-4">
@@ -109,6 +112,13 @@ export default {
     },
     isLoggedIn() {
       return this.authStore.isLoggedIn
+    },
+    errorTitle() {
+      if (!this.error) return ''
+      if (this.error.includes('Invalid')) return 'Неверные учетные данные'
+      if (this.error.includes('deactivated')) return 'Аккаунт деактивирован'
+      if (this.error.includes('Validation')) return 'Ошибка валидации'
+      return 'Ошибка входа'
     }
   },
 
@@ -142,18 +152,22 @@ export default {
       this.error = null
       this.loading = true
       try {
+        console.log('[LOGIN] Attempting login with email:', this.form.email)
         const result = await this.authStore.login({
           email: this.form.email,
           password: this.form.password
         })
 
         if (result.success) {
+          console.log('[LOGIN] Login successful for:', this.form.email)
           this.redirectUser()
         } else {
           this.error = result.error || this.$t('auth.loginError')
+          console.error('[LOGIN] Login failed:', this.error)
         }
       } catch (err) {
         this.error = this.$t('auth.loginError')
+        console.error('[LOGIN] Unexpected error:', err)
       } finally {
         this.loading = false
       }

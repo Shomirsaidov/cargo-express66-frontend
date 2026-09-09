@@ -9,7 +9,8 @@
 
       <div class="card">
         <div v-if="error"
-          class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+          class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600 whitespace-pre-line">
+          <strong>⚠️ {{ errorTitle }}</strong><br>
           {{ error }}
         </div>
 
@@ -193,6 +194,13 @@ export default {
     canSubmit() {
       return this.form.agree_terms && this.form.agree_cargo && this.form.agree_privacy &&
         this.form.password === this.form.confirm_password && this.form.password.length >= 8
+    },
+    errorTitle() {
+      if (!this.error) return ''
+      if (this.error.includes('Validation')) return 'Ошибка валидации'
+      if (this.error.includes('already')) return 'Email уже зарегистрирован'
+      if (this.error.includes('deactivated')) return 'Аккаунт деактивирован'
+      return 'Ошибка регистрации'
     }
   },
 
@@ -228,6 +236,7 @@ export default {
 
       if (this.form.password !== this.form.confirm_password) {
         this.error = 'Пароли не совпадают'
+        console.warn('[REGISTER] Passwords do not match')
         return
       }
 
@@ -243,14 +252,18 @@ export default {
           delivery_address: this.form.delivery_address
         }
 
+        console.log('[REGISTER] Attempting registration with email:', payload.email)
         const result = await this.authStore.register(payload)
         if (result.success) {
+          console.log('[REGISTER] Registration successful for:', payload.email)
           this.redirectUser()
         } else {
           this.error = result.error || this.$t('auth.registerError')
+          console.error('[REGISTER] Registration failed:', this.error)
         }
       } catch (err) {
         this.error = this.$t('auth.registerError')
+        console.error('[REGISTER] Unexpected error:', err)
       } finally {
         this.loading = false
       }
