@@ -202,7 +202,7 @@ export default {
     this.loading = true
     try {
       const r = await adminAPI.getDashboard()
-      this.dashData = r.data
+      this.dashData = r.data?.data || r.data
     } catch (e) {
       console.error('Failed to load dashboard data:', e)
     } finally {
