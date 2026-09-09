@@ -46,10 +46,10 @@
       <div class="card">
         <h3 class="section-title mb-4">Отправления по дням</h3>
         <div class="flex items-end gap-2 h-32">
-          <div v-for="(bar, i) in weeklyBars" :key="i" class="flex-1 flex flex-col items-center gap-1">
+          <div v-for="(bar, i) in weeklyBars" :key="i" class="flex-1 flex flex-col items-center justify-end gap-1 h-full">
             <span class="text-xs text-gray-500 font-medium">{{ bar.count }}</span>
             <div class="w-full rounded-t-md transition-all hover:opacity-80"
-              :style="{ height: `${barHeight(bar.count)}%`, backgroundColor: '#6997CF' }"></div>
+              :style="{ height: `${barHeight(bar.count)}px`, backgroundColor: '#6997CF' }"></div>
             <span class="text-xs text-gray-400">{{ bar.day }}</span>
           </div>
         </div>
@@ -59,10 +59,10 @@
       <div class="card">
         <h3 class="section-title mb-4">Выручка по месяцам ($)</h3>
         <div class="flex items-end gap-2 h-32">
-          <div v-for="(bar, i) in monthlyRevenue" :key="i" class="flex-1 flex flex-col items-center gap-1">
+          <div v-for="(bar, i) in monthlyRevenue" :key="i" class="flex-1 flex flex-col items-center justify-end gap-1 h-full">
             <span class="text-xs text-gray-500 font-medium">{{ bar.amount }}</span>
             <div class="w-full rounded-t-md transition-all hover:opacity-80"
-              :style="{ height: `${revenueBarHeight(bar.amount)}%`, backgroundColor: bar.amount > 0 ? '#22c55e' : '#e5e7eb' }"></div>
+              :style="{ height: `${revenueBarHeight(bar.amount)}px`, backgroundColor: bar.amount > 0 ? '#22c55e' : '#e5e7eb' }"></div>
             <span class="text-xs text-gray-400">{{ bar.month }}</span>
           </div>
         </div>
@@ -190,11 +190,11 @@ export default {
   methods: {
     barHeight(count) {
       const max = Math.max(...this.weeklyBars.map(b => b.count)) || 1
-      return Math.max(5, (count / max) * 90)
+      return Math.max(4, Math.round((count / max) * 80))
     },
     revenueBarHeight(amount) {
       const max = Math.max(...this.monthlyRevenue.map(b => b.amount)) || 1
-      return Math.max(5, (amount / max) * 90)
+      return Math.max(4, Math.round((amount / max) * 80))
     }
   },
 
