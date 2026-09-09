@@ -76,7 +76,17 @@ export default {
 
   methods: {
     getError(error) {
-      return error.response?.data?.error || this.$t('auth.loginError')
+      const requestId = error.response?.data?.request_id || error.response?.headers?.['x-request-id']
+      if (error.code === 'ERR_CANCELED') {
+        return `Request was cancelled${requestId ? ` (request ${requestId})` : ''}. Please try again.`
+      }
+      if (error.code === 'ECONNABORTED' || error.message?.toLowerCase().includes('timeout')) {
+        return `The server took too long to respond${requestId ? ` (request ${requestId})` : ''}. Please try again.`
+      }
+      if (!error.response) {
+        return `Could not reach the email service${requestId ? ` (request ${requestId})` : ''}. Please try again.`
+      }
+      return error.response.data?.error || `Request failed${requestId ? ` (request ${requestId})` : ''}.`
     },
 
     async sendCode() {
@@ -84,7 +94,11 @@ export default {
       this.success = null
       this.loading = true
       try {
-        await authAPI.forgotPassword({ email: this.email })
+        const response = await authAPI.forgotPassword({ email: this.email })
+        console.info('[OTP] Password reset request accepted', {
+          requestId: response.data?.request_id || response.headers?.['x-request-id'],
+          status: response.status,
+        })
         this.step = 'code'
         this.success = null
       } catch (error) {

@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 // Use environment variable with fallback to production URL
-const baseURL = import.meta.env.VITE_API_URL || 'https://cargo-express66-backend.onrender.com/api'
+const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
 
 console.log('[API] Connecting to:', baseURL)
 
@@ -17,6 +17,8 @@ const api = axios.create({
 // Request interceptor - attach JWT token
 api.interceptors.request.use(
   (config) => {
+    const requestId = window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`
+    config.headers['X-Request-Id'] = requestId
     const token = localStorage.getItem('token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
@@ -82,7 +84,7 @@ export default api
 export const authAPI = {
   login: (data) => api.post('/auth/login', data),
   register: (data) => api.post('/auth/register', data),
-  forgotPassword: (data) => api.post('/auth/forgot-password', data),
+  forgotPassword: (data) => api.post('/auth/forgot-password', data, { timeout: 45000 }),
   resetPassword: (data) => api.post('/auth/reset-password', data),
   me: () => api.get('/auth/me'),
   updateProfile: (data) => api.put('/auth/me', data),
@@ -153,6 +155,7 @@ export const tariffsAPI = {
 
 // Services endpoints
 export const servicesAPI = {
+  getPublic: () => api.get('/services/public'),
   getAll: () => api.get('/services'),
   create: (data) => api.post('/services', data),
   update: (id, data) => api.put(`/services/${id}`, data),

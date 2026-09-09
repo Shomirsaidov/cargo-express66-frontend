@@ -794,7 +794,7 @@ export default {
 
     async loadServices() {
       try {
-        const servicesResponse = await servicesAPI.getAll()
+        const servicesResponse = await servicesAPI.getPublic()
         const services = servicesResponse.data?.data || servicesResponse.data || []
         if (Array.isArray(services) && services.length > 0) {
           this.availableServices = services

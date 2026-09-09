@@ -403,7 +403,7 @@ export default {
 
     async loadServices() {
       try {
-        const r = await servicesAPI.getAll()
+        const r = await servicesAPI.getPublic()
         const fetched = r.data?.data || r.data || []
         if (fetched.length > 0) {
           this.availableServices = fetched.map(fs => {
