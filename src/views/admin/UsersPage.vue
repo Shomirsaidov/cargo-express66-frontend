@@ -36,6 +36,7 @@
             <th>Имя</th>
             <th>Email</th>
             <th>Телефон</th>
+            <th>Адрес доставки</th>
             <th>Роль</th>
             <th>Статус</th>
             <th>Регистрация</th>
@@ -44,12 +45,12 @@
         </thead>
         <tbody>
           <tr v-if="loading">
-            <td colspan="8" class="text-center py-8">
+            <td colspan="9" class="text-center py-8">
               <div class="inline-block w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
             </td>
           </tr>
           <tr v-else-if="filtered.length === 0">
-            <td colspan="8" class="text-center py-8 text-gray-400">Пользователи не найдены</td>
+            <td colspan="9" class="text-center py-8 text-gray-400">Пользователи не найдены</td>
           </tr>
           <tr v-else v-for="user in filtered" :key="user.id">
             <td class="font-mono text-xs text-gray-600">{{ user.customer_code || 'CX-AAAAAA' }}</td>
@@ -61,6 +62,7 @@
             </td>
             <td class="text-gray-600">{{ user.email }}</td>
             <td class="text-gray-600">{{ user.phone || '—' }}</td>
+            <td class="text-gray-600 text-sm">{{ user.delivery_address || '—' }}</td>
             <td>
               <span class="badge"
                 :class="{
