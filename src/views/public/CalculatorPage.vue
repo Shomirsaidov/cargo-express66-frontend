@@ -242,10 +242,15 @@ export default {
     },
     activeBasePrice() {
       if (this.selectedTariff) {
-        return parseFloat(this.selectedTariff.price_per_kg)
+        const price = parseFloat(this.selectedTariff.price_per_kg)
+        return isNaN(price) ? 15 : price
       }
-      // Fallback
-      return 16
+      // Fallback when tariffs not loaded - better to show null than wrong price
+      if (this.tariffsList.length === 0) {
+        console.warn('[CALCULATOR] No tariffs loaded, cannot calculate price')
+        return null
+      }
+      return 15 // Default fallback if something goes wrong
     }
   },
 
@@ -401,16 +406,24 @@ export default {
   },
 
   methods: {
-    async loadTariffs() {
+    async loadTariffs(retryCount = 0) {
       try {
         const r = await tariffsAPI.getPublic()
         const newTariffs = r.data?.data || r.data || []
         if (newTariffs.length > 0) {
           this.tariffsList = newTariffs
           console.log('[CALCULATOR] Tariffs reloaded:', newTariffs.map(t => `${t.country}=$${t.price_per_kg}`).join(', '))
+        } else {
+          throw new Error('Empty tariffs response')
         }
       } catch (e) {
-        console.error('[CALCULATOR] Failed to load tariffs:', e)
+        console.error('[CALCULATOR] Failed to load tariffs (attempt ' + (retryCount + 1) + '):', e.message || e)
+        // Retry once after 2 seconds if first attempt fails
+        if (retryCount < 1) {
+          setTimeout(() => this.loadTariffs(retryCount + 1), 2000)
+        } else {
+          console.error('[CALCULATOR] Tariff loading failed after retries')
+        }
       }
     },
 

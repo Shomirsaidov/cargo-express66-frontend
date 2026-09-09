@@ -1,10 +1,16 @@
 import axios from 'axios'
 
+// Use environment variable with fallback to production URL
+const baseURL = import.meta.env.VITE_API_URL || 'https://cargo-express66-backend.onrender.com/api'
+
+console.log('[API] Connecting to:', baseURL)
+
 const api = axios.create({
-  baseURL: 'https://cargo-express66-backend.onrender.com/api',
-  timeout: 15000,
+  baseURL: baseURL,
+  timeout: 20000, // Increased timeout to handle slow Render instances
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Cache-Control': 'no-cache'
   }
 })
 
@@ -22,28 +28,50 @@ api.interceptors.request.use(
   }
 )
 
-// Response interceptor - handle 401
+// Response interceptor - handle 401 and log errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
+    const status = error.response?.status
+    const message = error.response?.data?.error || error.message
+
+    // Log all errors for debugging
+    console.error('[API ERROR]', {
+      status,
+      message,
+      url: error.config?.url,
+      method: error.config?.method,
+      timestamp: new Date().toISOString()
+    })
+
+    if (status === 401) {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
-      
+
       const hash = window.location.hash || ''
-      const isProtected = hash.startsWith('#/dashboard') || 
-                          hash.startsWith('#/admin') || 
-                          hash.startsWith('#/warehouse') || 
-                          hash.startsWith('#/profile') || 
-                          hash.startsWith('#/shipments') || 
-                          hash.startsWith('#/tracking-numbers') || 
-                          hash.startsWith('#/notifications') || 
+      const isProtected = hash.startsWith('#/dashboard') ||
+                          hash.startsWith('#/admin') ||
+                          hash.startsWith('#/warehouse') ||
+                          hash.startsWith('#/profile') ||
+                          hash.startsWith('#/shipments') ||
+                          hash.startsWith('#/tracking-numbers') ||
+                          hash.startsWith('#/notifications') ||
                           hash.startsWith('#/settings')
-                          
+
       if (isProtected) {
         window.location.hash = '/login'
       }
     }
+
+    // Log network errors separately
+    if (!error.response) {
+      console.error('[NETWORK ERROR] No response received:', {
+        message: error.message,
+        code: error.code,
+        url: error.config?.url
+      })
+    }
+
     return Promise.reject(error)
   }
 )

@@ -795,7 +795,7 @@ export default {
       }
     },
 
-    async loadTariffs() {
+    async loadTariffs(retryCount = 0) {
       try {
         const response = await tariffsAPI.getPublic()
         const tariffs = response.data?.data || response.data || []
@@ -805,9 +805,17 @@ export default {
         if (newTariffs.length > 0) {
           this.tariffsList = newTariffs
           console.log('[HOME] Tariffs reloaded:', newTariffs.map(t => `${t.country}=$${t.price_per_kg}`).join(', '))
+        } else {
+          throw new Error('Empty tariffs response')
         }
       } catch (error) {
-        console.error('[HOME] Failed to load tariffs:', error)
+        console.error('[HOME] Failed to load tariffs (attempt ' + (retryCount + 1) + '):', error.message || error)
+        // Retry once after 2 seconds if first attempt fails
+        if (retryCount < 1) {
+          setTimeout(() => this.loadTariffs(retryCount + 1), 2000)
+        } else {
+          console.error('[HOME] Tariff loading failed after retries')
+        }
       }
     },
 
