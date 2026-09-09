@@ -5,8 +5,69 @@
       <span class="text-sm text-gray-500">{{ loading ? 'Загрузка...' : `Обновлено: ${now}` }}</span>
     </div>
 
-    <div v-if="loading" class="flex items-center justify-center h-64">
-      <p class="text-gray-500">Загрузка данных...</p>
+    <div v-if="loading">
+      <!-- Stats grid skeleton -->
+      <div class="grid grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
+        <div v-for="i in 6" :key="i" class="stat-card">
+          <div class="stat-icon flex items-center justify-center bg-gray-100">
+            <div class="w-6 h-6 rounded-full bg-gray-200 animate-pulse"></div>
+          </div>
+          <div class="flex-1 space-y-2">
+            <div class="h-6 w-16 rounded bg-gray-200 animate-pulse"></div>
+            <div class="h-3 w-24 rounded bg-gray-100 animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts row skeleton -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div class="card">
+          <div class="h-4 w-40 rounded bg-gray-200 animate-pulse mb-4"></div>
+          <div class="flex items-end gap-2 h-32">
+            <div v-for="i in 7" :key="i" class="flex-1 flex flex-col items-center justify-end h-full">
+              <div class="w-full rounded-t-md bg-gray-200 animate-pulse"
+                :style="{ height: `${skeletonBarHeights[i - 1]}px`, animationDelay: `${i * 80}ms` }"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="h-4 w-40 rounded bg-gray-200 animate-pulse mb-4"></div>
+          <div class="flex items-end gap-2 h-32">
+            <div v-for="i in 6" :key="i" class="flex-1 flex flex-col items-center justify-end h-full">
+              <div class="w-full rounded-t-md bg-gray-200 animate-pulse"
+                :style="{ height: `${skeletonBarHeights[i]}px`, animationDelay: `${i * 80}ms` }"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom row skeleton -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="card">
+          <div class="h-4 w-48 rounded bg-gray-200 animate-pulse mb-4"></div>
+          <div class="space-y-4">
+            <div v-for="i in 5" :key="i" class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <div class="h-3 w-28 rounded bg-gray-100 animate-pulse"></div>
+                <div class="h-3 w-6 rounded bg-gray-100 animate-pulse"></div>
+              </div>
+              <div class="h-2 w-full rounded-full bg-gray-100 animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="h-4 w-40 rounded bg-gray-200 animate-pulse mb-4"></div>
+          <div class="space-y-3">
+            <div v-for="i in 4" :key="i" class="flex items-start gap-3 p-2">
+              <div class="w-8 h-8 rounded-full bg-gray-200 animate-pulse flex-shrink-0"></div>
+              <div class="flex-1 space-y-1.5">
+                <div class="h-3 w-full max-w-[180px] rounded bg-gray-100 animate-pulse"></div>
+                <div class="h-2.5 w-16 rounded bg-gray-100 animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <template v-else-if="dashData">
@@ -139,7 +200,8 @@ export default {
   data() {
     return {
       dashData: null,
-      loading: false
+      loading: false,
+      skeletonBarHeights: [30, 55, 40, 70, 45, 60, 35]
     }
   },
 
