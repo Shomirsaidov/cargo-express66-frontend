@@ -226,6 +226,7 @@ export default {
       selectedParcelIds: [],
       assigningBulk: false,
       searchParcelQuery: '',
+      unassignedLoadId: 0,
 
       form: {
         awb_number: '',
@@ -300,17 +301,38 @@ export default {
     },
 
     async loadUnassignedParcels() {
+      const loadId = ++this.unassignedLoadId
       try {
-        const params = { limit: 100 }
-        if (this.searchParcelQuery.trim()) {
-          params.search = this.searchParcelQuery.trim()
-        }
-        const r = await parcelsAPI.getAll(params)
-        const list = r.data.data || []
+        const limit = 100
+        const list = []
+        let page = 1
+        let total = 0
+
+        do {
+          const params = { page, limit }
+          if (this.searchParcelQuery.trim()) {
+            params.search = this.searchParcelQuery.trim()
+          }
+
+          const r = await parcelsAPI.getAll(params)
+          const pageData = r.data.data || []
+          const pagination = r.data.pagination || {}
+          list.push(...pageData)
+          total = Number(pagination.total || list.length)
+          page += 1
+
+          if (pageData.length === 0) break
+        } while (list.length < total)
+
+        // Ignore an older search response that finished after a newer one.
+        if (loadId !== this.unassignedLoadId) return
+
         // Filter out parcels that are already assigned to an AWB
         this.unassignedParcels = list.filter(p => !p.airway_bill_id)
       } catch (e) {
-        this.unassignedParcels = []
+        if (loadId === this.unassignedLoadId) {
+          this.unassignedParcels = []
+        }
       }
     },
 
