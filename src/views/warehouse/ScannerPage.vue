@@ -203,6 +203,41 @@
             </div>
           </div>
 
+          <!-- Recipient Information -->
+          <div class="card p-4 bg-gray-50 border-0">
+            <h3 class="font-semibold text-sm mb-3">📦 Информация о получателе</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="form-label">Получатель (ФИО):</label>
+                <input
+                  v-model="form.recipient_name"
+                  type="text"
+                  class="input-field"
+                  placeholder="ФИО получателя"
+                  :disabled="form.recipient_is_customer"
+                />
+              </div>
+              <div>
+                <label class="form-label">Страна назначения:</label>
+                <select v-model="form.destination_country" class="input-field">
+                  <option value="">-- Выберите страну --</option>
+                  <option value="Таджикистан">Таджикистан</option>
+                </select>
+              </div>
+            </div>
+            <div class="mt-3">
+              <label class="flex items-center gap-2 cursor-pointer select-none">
+                <input type="checkbox" v-model="form.recipient_is_customer"
+                  class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded"
+                  :disabled="!selectedCustomer" />
+                <span class="text-sm font-medium text-gray-700">Получатель тот же, что и отправитель (клиент)</span>
+              </label>
+              <p v-if="!selectedCustomer" class="text-[10px] text-red-500 mt-1">
+                * Для выбора этой опции необходимо назначить клиента
+              </p>
+            </div>
+          </div>
+
           <div>
             <label class="form-label">Заметки / Примечания:</label>
             <textarea
@@ -268,6 +303,9 @@ export default {
         dimensions: '',
         declared_value: '',
         notes: '',
+        recipient_name: '',
+        recipient_is_customer: false,
+        destination_country: '',
         photos: []
       }
     }
@@ -313,6 +351,9 @@ export default {
         dimensions: '',
         declared_value: '',
         notes: '',
+        recipient_name: '',
+        recipient_is_customer: false,
+        destination_country: '',
         photos: []
       }
 
@@ -322,6 +363,14 @@ export default {
 
         if (this.result.action === 'pre_registered' && this.result.customer) {
           this.selectedCustomer = this.result.customer
+        }
+
+        // Pre-fill recipient fields from pre-registered tracking record
+        if (this.result.action === 'pre_registered' && this.result.tracking_record) {
+          const tr = this.result.tracking_record
+          this.form.recipient_name = tr.recipient_name || ''
+          this.form.recipient_is_customer = !!tr.recipient_is_customer
+          this.form.destination_country = tr.destination_country || ''
         }
 
         // Set focus to weight field after UI renders
@@ -364,6 +413,7 @@ export default {
 
     clearCustomer() {
       this.selectedCustomer = null
+      this.form.recipient_is_customer = false
     },
 
     resetScan() {
@@ -409,6 +459,9 @@ export default {
         if (this.form.dimensions) fd.append('dimensions', this.form.dimensions)
         if (this.form.declared_value) fd.append('declared_value', this.form.declared_value)
         if (this.form.notes) fd.append('notes', this.form.notes)
+        if (this.form.recipient_name) fd.append('recipient_name', this.form.recipient_name)
+        fd.append('recipient_is_customer', this.form.recipient_is_customer ? 'true' : 'false')
+        if (this.form.destination_country) fd.append('destination_country', this.form.destination_country)
 
         // Convert and append base64 photos
         this.form.photos.forEach((base64, index) => {

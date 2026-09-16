@@ -176,7 +176,8 @@ export const awbAPI = {
 // Reports endpoints
 export const reportsAPI = {
   generate: (params) => api.get('/reports/weekly', { params, responseType: 'blob' }),
-  getStats: (params) => api.get('/reports/weekly', { params }) // Weekly report has stats metadata
+  getStats: (params) => api.get('/reports/weekly', { params }), // Weekly report has stats metadata
+  generateAwb: (awbId, params) => api.get(`/reports/awb/${awbId}`, { params, responseType: 'blob' })
 }
 
 // CMS endpoints
