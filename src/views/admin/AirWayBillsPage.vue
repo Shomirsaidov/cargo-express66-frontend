@@ -80,6 +80,25 @@
           </div>
         </div>
 
+        <!-- Download AWB Report -->
+        <div class="border-t border-gray-100 pt-3">
+          <label class="form-label">Скачать отчёт по накладной:</label>
+          <div class="flex gap-2">
+            <select v-model="reportFormat" class="input-field py-1 text-xs">
+              <option value="excel">Excel (.xlsx)</option>
+              <option value="pdf">PDF (.pdf)</option>
+              <option value="csv">CSV (.csv)</option>
+            </select>
+            <button @click="downloadAwbReport" class="btn btn-outline btn-sm" :disabled="downloadingReport">
+              <svg v-if="downloadingReport" class="animate-spin w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+              </svg>
+              Скачать
+            </button>
+          </div>
+        </div>
+
         <!-- Assigned Parcels -->
         <div>
           <div class="flex justify-between items-center mb-2">
@@ -206,7 +225,7 @@
 </template>
 
 <script>
-import { awbAPI, parcelsAPI } from '@/api/index.js'
+import { awbAPI, parcelsAPI, reportsAPI } from '@/api/index.js'
 
 export default {
   name: 'AdminAirWayBillsPage',
@@ -227,6 +246,8 @@ export default {
       assigningBulk: false,
       searchParcelQuery: '',
       unassignedLoadId: 0,
+      reportFormat: 'excel',
+      downloadingReport: false,
 
       form: {
         awb_number: '',
@@ -460,6 +481,32 @@ export default {
         } catch (e) {
           alert('Ошибка удаления')
         }
+      }
+    },
+
+    async downloadAwbReport() {
+      if (!this.selectedAwb) return
+      this.downloadingReport = true
+      try {
+        const response = await reportsAPI.generateAwb(this.selectedAwb.id, { format: this.reportFormat })
+
+        const blob = new Blob([response.data], { type: response.headers['content-type'] })
+        const link = document.createElement('a')
+        link.href = window.URL.createObjectURL(blob)
+
+        const disposition = response.headers['content-disposition']
+        let filename = `awb-report-${this.selectedAwb.awb_number}.${this.reportFormat === 'excel' ? 'xlsx' : this.reportFormat}`
+        if (disposition && disposition.indexOf('filename=') !== -1) {
+          filename = disposition.split('filename=')[1].replace(/"/g, '')
+        }
+
+        link.download = filename
+        link.click()
+        window.URL.revokeObjectURL(link.href)
+      } catch (e) {
+        alert('Ошибка при скачивании отчёта')
+      } finally {
+        this.downloadingReport = false
       }
     }
   },
