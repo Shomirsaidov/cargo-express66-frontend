@@ -208,8 +208,10 @@ export default {
 
       this.saving = true
       try {
-        // Update status using parcels status endpoint
-        await parcelsAPI.updateStatus(this.editingParcel.id, this.form.status)
+        // Update status only if it changed
+        if (this.form.status !== this.editingParcel.status) {
+          await parcelsAPI.updateStatus(this.editingParcel.id, this.form.status)
+        }
 
         // Update other fields using general parcels update endpoint
         await parcelsAPI.update(this.editingParcel.id, {

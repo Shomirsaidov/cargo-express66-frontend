@@ -443,6 +443,7 @@ export default {
       showModal: false,
       isEdit: false,
       editingId: null,
+      editingParcel: null,
 
       isNoTrack: false,
       showPrintLabelModal: false,
@@ -605,6 +606,7 @@ export default {
       this.isEdit = false
       this.isNoTrack = isNoTrack
       this.editingId = null
+      this.editingParcel = null
       this.selectedCustomer = null
       this.customerQuery = ''
       this.customerResults = []
@@ -630,6 +632,7 @@ export default {
       this.isEdit = true
       this.isNoTrack = false
       this.editingId = p.id
+      this.editingParcel = p
       this.selectedCustomer = p.customers || null
       this.customerQuery = ''
       this.customerResults = []
@@ -870,8 +873,10 @@ export default {
         if (this.isEdit) {
           // General fields update
           await parcelsAPI.update(this.editingId, payload)
-          // Status update
-          await parcelsAPI.updateStatus(this.editingId, this.form.status)
+          // Status update ONLY if status actually changed
+          if (this.editingParcel && this.form.status !== this.editingParcel.status) {
+            await parcelsAPI.updateStatus(this.editingId, this.form.status)
+          }
         } else {
           const r = await parcelsAPI.create(payload)
           savedParcel = r.data.data || r.data
