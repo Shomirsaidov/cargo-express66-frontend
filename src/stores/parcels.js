@@ -9,7 +9,7 @@ export const useParcelsStore = defineStore('parcels', {
     error: null,
     total: 0,
     page: 1,
-    perPage: 20,
+    perPage: 1000,
     filters: {
       status: '',
       warehouse_id: '',
@@ -32,6 +32,7 @@ export const useParcelsStore = defineStore('parcels', {
       try {
         const response = await parcelsAPI.getAll({
           page: this.page,
+          limit: this.perPage,
           per_page: this.perPage,
           ...this.filters,
           ...params

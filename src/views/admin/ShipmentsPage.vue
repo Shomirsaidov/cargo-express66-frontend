@@ -174,7 +174,7 @@
                 <div class="grid grid-cols-2 gap-4">
                   <div>
                     <label class="form-label">Вес (кг):</label>
-                    <input v-model="form.weight" type="number" step="0.01" class="input-field" />
+                    <input v-model="form.weight" type="number" step="0.001" class="input-field" />
                   </div>
 
                   <div>
@@ -536,14 +536,13 @@ export default {
     deliveryCost() {
       const weight = parseFloat(this.form.weight) || 0;
       if (!weight || weight <= 0) return 0;
-      const calculatedWeight = weight < 1.0 ? 1.0 : weight;
       let rate = 16;
-      if (calculatedWeight >= 1000) {
+      if (weight >= 1000) {
         rate = 11;
-      } else if (calculatedWeight >= 100) {
+      } else if (weight >= 100) {
         rate = 15;
       }
-      return calculatedWeight * rate;
+      return weight * rate;
     },
     totalCost() {
       return this.deliveryCost + this.additionalServicesCost + this.insuranceCost;

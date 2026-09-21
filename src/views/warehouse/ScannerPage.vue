@@ -172,9 +172,9 @@
                 <input
                   v-model="form.weight"
                   type="number"
-                  step="0.01"
+                  step="0.001"
                   required
-                  placeholder="0.00"
+                  placeholder="0.000"
                   class="input-field font-semibold text-lg"
                   ref="weightField"
                 />

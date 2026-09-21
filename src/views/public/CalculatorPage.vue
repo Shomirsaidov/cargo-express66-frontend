@@ -53,12 +53,12 @@
           <div class="form-group" v-if="form.cargo_type === 'regular' || form.tech_type === 'ps5_xbox'">
             <label class="form-label">{{ $t('calculator.weight') }}</label>
             <div class="relative">
-              <input v-model.number="form.weight" type="number" min="0.1" step="0.1" required
-                class="input-field pr-12" placeholder="0.0" />
+              <input v-model.number="form.weight" type="number" min="0.01" step="any" required
+                class="input-field pr-12" placeholder="0.00" />
               <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">кг</span>
             </div>
             <p class="text-[10px] text-gray-400 mt-1 leading-relaxed">
-              * Вес округляется до 1 кг, если он менее 1 кг. Более 1 кг рассчитывается по фактическому весу.
+              * Расчет стоимости ведется строго по граммам без минимального округления до 1 кг.
             </p>
           </div>
 
@@ -191,12 +191,12 @@
                 <p class="font-semibold text-primary text-xs">${{ Math.max(1, activeBasePrice - 5) }}/кг</p>
               </div>
             </div>
-            <div class="flex items-center justify-between p-3 bg-amber-50/50 rounded-lg border border-amber-100/50 mt-1">
+            <div class="flex items-center justify-between p-3 bg-blue-50/50 rounded-lg border border-blue-100/50 mt-1">
               <div>
-                <p class="font-medium text-xs text-amber-800">Минимальный заказ</p>
+                <p class="font-medium text-xs text-primary">Тарификация</p>
               </div>
               <div class="text-right">
-                <p class="font-semibold text-amber-800 text-xs">${{ selectedTariff ? selectedTariff.minimum_charge : 10 }}</p>
+                <p class="font-semibold text-primary text-xs">Строго по граммам</p>
               </div>
             </div>
           </div>
@@ -345,21 +345,14 @@ export default {
       if (isTechItem && techRates[this.form.tech_type]) {
         baseCost = techRates[this.form.tech_type]
       } else {
-        // Enforce weight calculation logic locally using dynamic rates
         const basePrice = this.activeBasePrice
-        const minimumCharge = this.selectedTariff ? parseFloat(this.selectedTariff.minimum_charge) : 10
-        const calculatedWeight = weightVal < 1.0 ? 1.0 : weightVal
-        
         let rate = basePrice
-        if (calculatedWeight >= 1000) {
+        if (weightVal >= 1000) {
           rate = Math.max(1, basePrice - 5)
-        } else if (calculatedWeight >= 100) {
+        } else if (weightVal >= 100) {
           rate = Math.max(1, basePrice - 1)
         }
-        baseCost = calculatedWeight * rate
-        if (baseCost < minimumCharge) {
-          baseCost = minimumCharge
-        }
+        baseCost = weightVal * rate
       }
 
       // Calculate insurance

@@ -121,7 +121,7 @@
 
                 <div>
                   <label class="form-label">Вес (кг):</label>
-                  <input v-model="form.weight" type="number" step="0.01" class="input-field" />
+                  <input v-model="form.weight" type="number" step="0.001" class="input-field" />
                 </div>
 
                 <div>

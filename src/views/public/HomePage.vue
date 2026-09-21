@@ -271,8 +271,8 @@
             <div class="form-group" v-if="calcForm.cargo_type === 'regular' || calcForm.tech_type === 'ps5_xbox'">
               <label class="form-label font-bold text-gray-800 mb-1.5">Вес посылки (кг)</label>
               <div class="relative">
-                <input v-model.number="calcForm.weight" type="number" min="0.1" step="0.1" required
-                  class="input-field pr-12" placeholder="0.0" />
+                <input v-model.number="calcForm.weight" type="number" min="0.01" step="any" required
+                  class="input-field pr-12" placeholder="0.00" />
                 <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-semibold">кг</span>
               </div>
             </div>

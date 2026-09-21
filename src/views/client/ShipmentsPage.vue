@@ -1,6 +1,11 @@
 <template>
   <div class="p-4 sm:p-6 max-w-2xl mx-auto">
-    <h1 class="page-title mb-4">{{ $t('shipments.title') }}</h1>
+    <div class="flex items-center justify-between mb-4">
+      <h1 class="page-title">{{ $t('shipments.title') }}</h1>
+      <span v-if="filteredParcels.length" class="text-xs font-semibold px-2.5 py-1 bg-primary-50 text-primary rounded-full">
+        Всего: {{ filteredParcels.length }}
+      </span>
+    </div>
 
     <!-- Search and filter -->
     <div class="flex gap-3 mb-4">
@@ -122,7 +127,7 @@ export default {
   },
 
   mounted() {
-    this.parcelsStore.fetchParcels()
+    this.parcelsStore.fetchParcels({ limit: 1000, per_page: 1000 })
   }
 }
 </script>

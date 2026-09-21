@@ -174,8 +174,8 @@
                   </div>
                   <div v-else class="form-group">
                     <label class="form-label">Ориентировочный вес (кг) для расчета стоимости:</label>
-                    <input v-model="form.estimated_weight" type="number" step="0.1" min="0" class="input-field"
-                      placeholder="Например: 1.5" />
+                    <input v-model="form.estimated_weight" type="number" step="any" min="0" class="input-field"
+                      placeholder="Например: 0.35 или 1.5" />
                   </div>
 
                   <!-- Additional Services Checklist -->
@@ -355,14 +355,13 @@ export default {
     },
     calculateDeliveryCostForWeight(weight) {
       if (!weight || weight <= 0) return 0;
-      const calculatedWeight = weight < 1.0 ? 1.0 : weight;
       let rate = 16;
-      if (calculatedWeight >= 1000) {
+      if (weight >= 1000) {
         rate = 11;
-      } else if (calculatedWeight >= 100) {
+      } else if (weight >= 100) {
         rate = 15;
       }
-      return calculatedWeight * rate;
+      return weight * rate;
     },
     async checkExistingParcel() {
       const trackNum = this.form.tracking_number.trim();
