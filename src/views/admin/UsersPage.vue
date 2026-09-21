@@ -82,9 +82,9 @@
             <td class="text-gray-500 text-xs">{{ formatDate(user.created_at) }}</td>
             <td>
               <div class="flex items-center gap-1">
-                <button @click="openEditRole(user)"
+                <button @click="openEditUser(user)"
                   class="p-1.5 text-gray-400 hover:text-primary hover:bg-primary-50 rounded-lg transition-all text-xs"
-                  title="Изменить роль">
+                  title="Редактировать данные (ФИО, адрес, роль)">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -114,29 +114,87 @@
       </table>
     </div>
 
-    <!-- Edit Role Modal -->
+    <!-- Edit User Modal -->
     <Teleport to="body">
       <transition name="fade">
         <div v-if="editingUser" class="modal-overlay" @click.self="editingUser = null">
-          <div class="modal-content max-w-sm">
+          <div class="modal-content max-w-lg">
             <div class="p-6">
-              <h3 class="text-lg font-bold mb-4">Изменить роль пользователя</h3>
-              <p class="text-sm text-gray-600 mb-4">
-                {{ editingUser.last_name }} {{ editingUser.first_name }}
-              </p>
-              <select v-model="newRole" class="input-field mb-4">
-                <option value="customer">Клиент</option>
-                <option value="warehouse_employee">Сотрудник склада</option>
-                <option value="admin">Администратор</option>
-              </select>
-              <div class="flex gap-3">
-                <button @click="editingUser = null" class="btn btn-ghost flex-1 border border-gray-200">
-                  Отмена
-                </button>
-                <button @click="saveRole" class="btn btn-primary flex-1">
-                  Сохранить
+              <div class="flex items-center justify-between pb-3 mb-4 border-b border-gray-100">
+                <div>
+                  <h3 class="text-lg font-bold text-gray-900">Редактирование данных клиента</h3>
+                  <div class="flex items-center gap-2 mt-1">
+                    <span class="font-mono text-xs font-bold text-primary bg-primary-50 px-2 py-0.5 rounded">
+                      {{ editingUser.customer_code || 'CX-AAAAAA' }}
+                    </span>
+                    <span class="text-xs text-gray-500">{{ editingUser.email }}</span>
+                  </div>
+                </div>
+                <button @click="editingUser = null" class="text-gray-400 hover:text-gray-600 p-1">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
                 </button>
               </div>
+
+              <form @submit.prevent="saveUser" class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="form-label font-semibold text-gray-700">Фамилия *</label>
+                    <input v-model="editForm.last_name" type="text" required class="input-field"
+                      placeholder="Например: Иванов" />
+                  </div>
+                  <div>
+                    <label class="form-label font-semibold text-gray-700">Имя *</label>
+                    <input v-model="editForm.first_name" type="text" required class="input-field"
+                      placeholder="Например: Иван" />
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="form-label font-semibold text-gray-700">Отчество</label>
+                    <input v-model="editForm.middle_name" type="text" class="input-field"
+                      placeholder="Например: Иванович" />
+                  </div>
+                  <div>
+                    <label class="form-label font-semibold text-gray-700">Телефон</label>
+                    <input v-model="editForm.phone" type="text" class="input-field"
+                      placeholder="+992 90 000 0000" />
+                  </div>
+                </div>
+
+                <div>
+                  <label class="form-label font-semibold text-gray-700">Адрес доставки</label>
+                  <textarea v-model="editForm.delivery_address" rows="2" class="input-field"
+                    placeholder="г. Душанбе, ул. Рудаки 10, кв. 5..."></textarea>
+                  <p class="text-[11px] text-gray-400 mt-1">
+                    Укажите корректный адрес для доставки посылок клиенту.
+                  </p>
+                </div>
+
+                <div>
+                  <label class="form-label font-semibold text-gray-700">Роль в системе</label>
+                  <select v-model="editForm.role" class="input-field">
+                    <option value="customer">Клиент</option>
+                    <option value="warehouse_employee">Сотрудник склада</option>
+                    <option value="admin">Администратор</option>
+                  </select>
+                </div>
+
+                <div class="flex gap-3 pt-3 border-t border-gray-100">
+                  <button type="button" @click="editingUser = null" class="btn btn-ghost flex-1 border border-gray-200">
+                    Отмена
+                  </button>
+                  <button type="submit" :disabled="saving" class="btn btn-primary flex-1">
+                    <svg v-if="saving" class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
+                    {{ saving ? 'Сохранение...' : 'Сохранить изменения' }}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
@@ -155,11 +213,19 @@ export default {
     return {
       users: [],
       loading: false,
+      saving: false,
       search: '',
       roleFilter: '',
       activeFilter: '',
       editingUser: null,
-      newRole: 'customer'
+      editForm: {
+        first_name: '',
+        last_name: '',
+        middle_name: '',
+        phone: '',
+        delivery_address: '',
+        role: 'customer'
+      }
     }
   },
 
@@ -171,9 +237,11 @@ export default {
       if (this.search.trim()) {
         const q = this.search.toLowerCase()
         list = list.filter(u =>
-          `${u.first_name} ${u.last_name}`.toLowerCase().includes(q) ||
+          `${u.first_name} ${u.last_name} ${u.middle_name || ''}`.toLowerCase().includes(q) ||
           u.email?.toLowerCase().includes(q) ||
-          u.customer_code?.toLowerCase().includes(q)
+          u.customer_code?.toLowerCase().includes(q) ||
+          u.phone?.toLowerCase().includes(q) ||
+          u.delivery_address?.toLowerCase().includes(q)
         )
       }
       return list
@@ -185,18 +253,45 @@ export default {
       if (!d) return '—'
       return new Date(d).toLocaleDateString('ru-RU')
     },
-    openEditRole(user) {
+    openEditUser(user) {
       this.editingUser = user
-      this.newRole = user.role
+      this.editForm = {
+        first_name: user.first_name || '',
+        last_name: user.last_name || '',
+        middle_name: user.middle_name || '',
+        phone: user.phone || '',
+        delivery_address: user.delivery_address || '',
+        role: user.role || 'customer'
+      }
     },
-    async saveRole() {
+    async saveUser() {
       if (!this.editingUser) return
+      if (!this.editForm.first_name.trim() || !this.editForm.last_name.trim()) {
+        alert('Имя и фамилия обязательны для заполнения')
+        return
+      }
+      this.saving = true
       try {
-        await usersAPI.updateRole(this.editingUser.id, this.newRole)
-        this.editingUser.role = this.newRole
+        const payload = {
+          first_name: this.editForm.first_name.trim(),
+          last_name: this.editForm.last_name.trim(),
+          middle_name: this.editForm.middle_name.trim(),
+          phone: this.editForm.phone.trim(),
+          delivery_address: this.editForm.delivery_address.trim(),
+          role: this.editForm.role
+        }
+        const res = await usersAPI.update(this.editingUser.id, payload)
+        const updated = res.data?.data || res.data
+        if (updated) {
+          Object.assign(this.editingUser, updated)
+        } else {
+          Object.assign(this.editingUser, payload)
+        }
         this.editingUser = null
       } catch (e) {
-        alert('Ошибка обновления роли')
+        alert('Ошибка при сохранении: ' + (e.response?.data?.error || e.message))
+      } finally {
+        this.saving = false
       }
     },
     async deleteUser(user) {
