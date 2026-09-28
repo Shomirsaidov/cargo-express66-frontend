@@ -71,7 +71,7 @@ export default {
     country: 'Страна',
     createdAt: 'Дата создания',
     updatedAt: 'Последнее обновление',
-    arrivalDate: 'Ориентировочная дата прибытия',
+    arrivalDate: 'Дата получения на складе',
     shipmentDate: 'Дата отправки',
     deliveryDate: 'Дата доставки',
     declaredValue: 'Объявленная стоимость',

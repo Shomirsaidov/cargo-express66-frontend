@@ -71,7 +71,7 @@ export default {
     country: 'Country',
     createdAt: 'Created',
     updatedAt: 'Last Updated',
-    arrivalDate: 'Estimated Arrival Date',
+    arrivalDate: 'Received at Warehouse',
     shipmentDate: 'Shipment Date',
     deliveryDate: 'Delivery Date',
     declaredValue: 'Declared Value',
