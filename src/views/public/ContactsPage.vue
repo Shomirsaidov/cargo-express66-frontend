@@ -47,6 +47,32 @@
       </div>
     </div>
 
+    <!-- Email & working hours (managed in the admin panel → Контент сайта) -->
+    <div v-if="contacts.email || contacts.working_hours"
+      class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
+      <a v-if="contacts.email" :href="'mailto:' + contacts.email"
+        class="card p-6 border border-gray-150 flex items-center gap-4 bg-white hover:shadow-md transition-all no-underline">
+        <div class="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-3xl">
+          ✉️
+        </div>
+        <div>
+          <p class="text-xs text-gray-400 uppercase font-semibold tracking-wider">Email</p>
+          <p class="text-base font-bold text-gray-950 mt-0.5 break-all">{{ contacts.email }}</p>
+        </div>
+      </a>
+
+      <div v-if="contacts.working_hours"
+        class="card p-6 border border-gray-150 flex items-center gap-4 bg-white">
+        <div class="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-3xl">
+          🕒
+        </div>
+        <div>
+          <p class="text-xs text-gray-400 uppercase font-semibold tracking-wider">Часы работы</p>
+          <p class="text-base font-bold text-gray-950 mt-0.5">{{ contacts.working_hours }}</p>
+        </div>
+      </div>
+    </div>
+
     <!-- Warehouse & Office Locations -->
     <div v-if="locations.length" class="mb-12">
       <h2 class="text-2xl font-bold text-gray-900 mb-6">📍 Адреса пунктов приема и складов</h2>
