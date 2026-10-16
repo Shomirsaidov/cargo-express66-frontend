@@ -7,7 +7,7 @@
           <!-- Logo -->
           <RouterLink to="/" class="flex items-center gap-2 no-underline">
             <img src="@/assets/logo.png" alt="Logo" class="w-9 h-9 object-contain rounded-lg" />
-            <span class="font-bold text-lg text-gray-900">Cargo Express <span class="text-primary">66</span></span>
+            <span class="font-bold text-lg text-gray-900">{{ brand.head }} <span class="text-primary">{{ brand.tail }}</span></span>
           </RouterLink>
 
           <!-- Desktop Nav Links -->
@@ -143,11 +143,34 @@
           <div>
             <div class="flex items-center gap-2 mb-4">
               <img src="@/assets/logo.png" alt="Logo" class="w-8 h-8 object-contain rounded-lg bg-white p-0.5" />
-              <span class="font-bold text-white">Cargo Express 66</span>
+              <span class="font-bold text-white">{{ content.companyName }}</span>
             </div>
             <p class="text-sm text-gray-400 leading-relaxed">
-              {{ $t('home.heroDesc') }}
+              {{ content.footer.description }}
             </p>
+
+            <!-- Contacts (managed in the admin panel → Контент сайта) -->
+            <ul class="mt-5 space-y-2 text-sm text-gray-400">
+              <li v-if="contacts.usa && contacts.usa.phone">
+                <a :href="'tel:' + (contacts.usa.phone_raw || contacts.usa.phone)"
+                  class="hover:text-primary transition-colors no-underline">
+                  {{ contacts.usa.phone }}
+                </a>
+                <span class="text-gray-600"> · {{ contacts.usa.label }}</span>
+              </li>
+              <li v-for="phone in (contacts.tajikistan && contacts.tajikistan.phones) || []" :key="phone.display">
+                <a :href="'tel:' + (phone.raw || phone.display)"
+                  class="hover:text-primary transition-colors no-underline">
+                  {{ phone.display }}
+                </a>
+              </li>
+              <li v-if="contacts.email">
+                <a :href="'mailto:' + contacts.email" class="hover:text-primary transition-colors no-underline">
+                  {{ contacts.email }}
+                </a>
+              </li>
+              <li v-if="contacts.working_hours" class="text-gray-500">{{ contacts.working_hours }}</li>
+            </ul>
           </div>
           <div>
             <h4 class="font-semibold text-white mb-3 text-sm uppercase tracking-wide">{{ $t('nav.home') }}</h4>
@@ -177,8 +200,8 @@
           </div>
         </div>
         <div class="border-t border-gray-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p class="text-sm text-gray-500">&copy; 2024 Cargo Express 66. All rights reserved.</p>
-          <p class="text-sm text-gray-500">Tajikistan · USA · Germany</p>
+          <p class="text-sm text-gray-500">{{ content.footer.copyright }}</p>
+          <p class="text-sm text-gray-500">{{ content.footer.tagline }}</p>
         </div>
       </div>
     </footer>
@@ -187,6 +210,7 @@
 
 <script>
 import { useAuthStore } from '@/stores/auth.js'
+import { useSiteContentStore } from '@/stores/siteContent.js'
 import { useI18n } from 'vue-i18n'
 
 export default {
@@ -199,6 +223,19 @@ export default {
   },
 
   computed: {
+    content() {
+      return useSiteContentStore()
+    },
+    contacts() {
+      return useSiteContentStore().contacts
+    },
+    /** Split the company name so the trailing word keeps the brand highlight. */
+    brand() {
+      const name = this.content.companyName || 'Cargo Express 66'
+      const index = name.lastIndexOf(' ')
+      if (index === -1) return { head: name, tail: '' }
+      return { head: name.slice(0, index), tail: name.slice(index + 1) }
+    },
     isLoggedIn() {
       return useAuthStore().isLoggedIn
     },
@@ -238,6 +275,11 @@ export default {
       }
       localStorage.setItem('locale', newLocale)
     }
+  },
+
+  mounted() {
+    // Pull editable site content (contacts, footer, addresses …) from the DB once.
+    useSiteContentStore().load()
   },
 
   watch: {

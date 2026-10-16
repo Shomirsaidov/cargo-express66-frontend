@@ -189,6 +189,8 @@ export const cmsAPI = {
 
 // Settings endpoints
 export const settingsAPI = {
+  // Public site content (contacts, addresses, FAQ, About, footer) — no auth
+  getPublic: () => api.get('/settings/public'),
   getAll: () => api.get('/settings'),
   getOne: (key) => api.get(`/settings/${key}`),
   update: (key, data) => api.put(`/settings/${key}`, data)

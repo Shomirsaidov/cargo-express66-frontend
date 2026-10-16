@@ -180,6 +180,7 @@ export default {
     reports: 'Reports',
     settings: 'Settings',
     content: 'Content',
+    siteContent: 'Site content',
     totalCustomers: 'Total Customers',
     activeShipments: 'Active Shipments',
     deliveredShipments: 'Delivered',

@@ -39,6 +39,7 @@ const AdminServices = () => import('@/views/admin/ServicesPage.vue')
 const AdminReports = () => import('@/views/admin/ReportsPage.vue')
 const AdminSettings = () => import('@/views/admin/AdminSettingsPage.vue')
 const AdminContent = () => import('@/views/admin/ContentPage.vue')
+const AdminSiteContent = () => import('@/views/admin/SiteContentPage.vue')
 
 // Warehouse views
 const WarehouseScanner = () => import('@/views/warehouse/ScannerPage.vue')
@@ -107,7 +108,8 @@ const routes = [
       { path: 'services', name: 'admin-services', component: AdminServices },
       { path: 'reports', name: 'admin-reports', component: AdminReports },
       { path: 'settings', name: 'admin-settings', component: AdminSettings },
-      { path: 'content', name: 'admin-content', component: AdminContent }
+      { path: 'content', name: 'admin-content', component: AdminContent },
+      { path: 'site-content', name: 'admin-site-content', component: AdminSiteContent }
     ]
   },
 

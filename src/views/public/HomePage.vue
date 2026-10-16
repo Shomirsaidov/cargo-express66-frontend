@@ -68,19 +68,15 @@
             <div class="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center mb-4 text-2xl">
               🎯
             </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-4">Наша миссия</h3>
-            <p class="text-gray-600 leading-relaxed mb-6">
-              Сделать международные покупки доступными и простыми для каждого жителя Таджикистана.
-              Мы берем на себя все заботы по логистике, оформлению документов и надежной транспортировке ваших посылок из США и Европы. Вы просто покупаете — мы бережно доставляем.
+            <h3 class="text-2xl font-bold text-gray-900 mb-4">{{ about.mission_title }}</h3>
+            <p class="text-gray-600 leading-relaxed mb-6 whitespace-pre-line">
+              {{ about.home_mission_text }}
             </p>
           </div>
           <div class="border-t border-gray-100 pt-6">
-            <h4 class="font-bold text-gray-900 mb-2">Наши преимущества</h4>
+            <h4 class="font-bold text-gray-900 mb-2">{{ about.advantages_title }}</h4>
             <div class="grid grid-cols-2 gap-4 text-sm text-gray-600">
-              <div class="flex items-center gap-2">🔹 Фото посылки на складе</div>
-              <div class="flex items-center gap-2">🔹 Страхование грузов</div>
-              <div class="flex items-center gap-2">🔹 Личный кабинет 24/7</div>
-              <div class="flex items-center gap-2">🔹 Оплата при получении</div>
+              <div v-for="item in about.advantages" :key="item" class="flex items-center gap-2">🔹 {{ item }}</div>
             </div>
           </div>
         </div>
@@ -90,18 +86,15 @@
             <div class="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center mb-4 text-2xl">
               🛡️
             </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-4">Надежность и гарантии</h3>
-            <p class="text-gray-600 leading-relaxed mb-6">
-              Мы гарантируем 100% сохранность ваших посылок. Каждое отправление отслеживается на всех этапах пути: от прибытия на наш склад в США или Европе до момента выдачи в Таджикистане. Все грузы застрахованы, а наша служба поддержки всегда готова ответить на любые вопросы.
+            <h3 class="text-2xl font-bold text-gray-900 mb-4">{{ about.reliability_title }}</h3>
+            <p class="text-gray-600 leading-relaxed mb-6 whitespace-pre-line">
+              {{ about.reliability_text }}
             </p>
           </div>
           <div class="border-t border-gray-100 pt-6">
-            <h4 class="font-bold text-gray-900 mb-2">Наши склады приема</h4>
+            <h4 class="font-bold text-gray-900 mb-2">{{ about.warehouses_title }}</h4>
             <div class="grid grid-cols-2 gap-4 text-sm text-gray-600">
-              <div class="flex items-center gap-2">📍 Нью-Йорк, США</div>
-              <div class="flex items-center gap-2">📍 Делавэр, США</div>
-              <div class="flex items-center gap-2">📍 Мюнхен, Германия</div>
-              <div class="flex items-center gap-2">📍 Мадрид, Испания</div>
+              <div v-for="item in about.warehouses" :key="item" class="flex items-center gap-2">📍 {{ item }}</div>
             </div>
           </div>
         </div>
@@ -541,6 +534,7 @@
 
 <script>
 import { calculatorAPI, servicesAPI, tariffsAPI } from '@/api/index.js'
+import { useSiteContentStore } from '@/stores/siteContent.js'
 
 export default {
   name: 'HomePage',
@@ -561,18 +555,21 @@ export default {
         services: []
       },
       availableServices: [],
-      faqOpenIndex: null,
-      faqs: [
-        { q: 'Как узнать адрес склада в США?', a: 'Адреса наших складов приема в США указаны в личном кабинете. Для интернет-покупок используйте безналоговый склад в штате Делавэр: 1680 Porter Rd, Suite A-3, Bear, DE 19701, указав свой ID клиента.' },
-        { q: 'Как долго идёт посылка?', a: 'Доставка из США занимает 6-10 рабочих дней, из Германии, Испании и Италии — 7-14 рабочих дней. Сроки зависят от расписания авиарейсов и скорости таможенного оформления.' },
-        { q: 'Как отследить посылку?', a: 'Вы можете ввести трек-номер на странице отслеживания или отслеживать все свои посылки в личном кабинете после регистрации.' },
-        { q: 'Что нельзя отправлять?', a: 'Запрещены оружие, боеприпасы, лекарства без рецепта, опасные жидкости, литиевые аккумуляторы отдельно от приборов, алкоголь и табачные изделия. Полный список смотрите на странице Условий.' },
-        { q: 'Есть ли страхование?', a: 'Да, ваши посылки можно застраховать. Подробности уточняйте у службы поддержки.' }
-      ]
+      faqOpenIndex: null
     }
   },
 
   computed: {
+    // Editable content (FAQ, About blocks, figures) — managed in the admin panel.
+    siteContent() {
+      return useSiteContentStore()
+    },
+    about() {
+      return this.siteContent.about
+    },
+    faqs() {
+      return this.siteContent.faq
+    },
     selectedCalcTariff() {
       return this.tariffsList.find((tariff) => tariff.country.toLowerCase() === this.calcForm.country)
     },
@@ -634,12 +631,7 @@ export default {
       })
     },
     stats() {
-      return [
-        { value: '10,000+', label: 'Довольных клиентов' },
-        { value: '50,000+', label: 'Доставленных посылок' },
-        { value: '99.5%', label: 'Своевременная доставка' },
-        { value: '2 года', label: 'Опыта работы' }
-      ]
+      return this.about.stats
     },
     stepsDetailed() {
       return [
@@ -807,6 +799,9 @@ export default {
   },
 
   async mounted() {
+    // Editable content (FAQ, About blocks, figures) from Supabase.
+    useSiteContentStore().load()
+
     await this.loadTariffs()
     await this.loadServices()
 

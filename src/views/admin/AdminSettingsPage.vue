@@ -16,6 +16,17 @@
       </div>
     </div>
 
+    <!-- Hint: contacts & page content have their own editor -->
+    <div class="card p-4 border border-primary-100 bg-primary-50/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="text-sm text-gray-700">
+        <span class="font-semibold">Контакты, адреса складов, FAQ и тексты «О нас»</span>
+        редактируются на отдельной странице — изменения сразу подтягиваются на сайт из базы данных.
+      </div>
+      <RouterLink to="/admin/site-content" class="btn btn-primary btn-sm no-underline flex-shrink-0">
+        Открыть «Контент сайта»
+      </RouterLink>
+    </div>
+
     <!-- Tabs Navigation -->
     <div class="flex border-b border-gray-200">
       <button

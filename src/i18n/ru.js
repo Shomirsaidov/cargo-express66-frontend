@@ -180,6 +180,7 @@ export default {
     reports: 'Отчёты',
     settings: 'Настройки',
     content: 'Контент',
+    siteContent: 'Контент сайта',
     totalCustomers: 'Всего клиентов',
     activeShipments: 'Активные отправления',
     deliveredShipments: 'Доставленные',
