@@ -97,7 +97,7 @@
             <td>
               <StatusBadge :status="p.status" />
             </td>
-            <td class="text-gray-500 text-[10px]">{{ formatDate(p.created_at) }}</td>
+            <td class="text-gray-500 text-[10px] whitespace-nowrap">{{ formatDateTime(p.created_at) }}</td>
             <td>
               <div class="flex items-center gap-1">
                 <button @click="openPrintLabel(p)"
@@ -565,6 +565,11 @@ export default {
     formatDate(d) {
       if (!d) return '—'
       return new Date(d).toLocaleDateString('ru-RU')
+    },
+
+    formatDateTime(d) {
+      if (!d) return '—'
+      return new Date(d).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })
     },
 
     async loadParcels() {
